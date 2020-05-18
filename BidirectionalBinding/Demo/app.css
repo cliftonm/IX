@@ -1,0 +1,220 @@
+﻿.reset {
+    clear: both;
+}
+
+.inline {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.fieldInput {
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.filterInput {
+    max-width: 140px;
+}
+
+.fieldInputLong {
+    min-width: 750px;
+    max-width: 750px;
+}
+
+/* combobox are stupid, the width rendering is different than textboxes */
+.cbFieldInput {
+    min-width: 154px;
+    max-width: 154px;
+}
+
+.label {
+    vertical-align: top;
+    min-width: 100px;
+    text-align: right;
+}
+
+.marginTop5 {
+    margin-top: 5px;
+}
+
+.marginTop15 {
+    margin-top: 15px;
+}
+
+.button {
+    min-width: 80px;
+}
+
+table {
+    border: 1px solid gray;
+    /*table-layout: fixed;*/
+}
+
+tbody {
+    height: 150px;
+}
+
+tr td {
+    padding-top: 0em;
+}
+
+.selected {
+    background-color: lightblue;
+}
+
+.htable {
+    min-width: 220px;
+}
+
+.entityList {
+    width: 200px;
+    overflow: auto;
+    display: inline-block; /* inline-block needed for scrollbar */
+}
+
+.fieldList {
+    width: 300px;
+    overflow: auto;
+    display: inline-block; /* inline-block needed for scrollbar */
+}
+
+.result {
+    overflow: auto;
+    display: inline-block; /* inline-block needed for scrollbar */
+}
+
+.rowSelected {
+    background-color: lightblue;
+}
+
+#results {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    font-size: small;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+
+#resultsTable td {
+    border: 1px solid #ddd;
+    padding: 2px;
+}
+
+#resultsTable th {
+    border: 1px solid #ddd;
+    padding-left: 2px;
+    margin: 0px;
+}
+
+#resultsTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#resultsTable tr:hover {
+    background-color: #ddd;
+}
+
+#resultsTable th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* ============================= */
+
+.parcelInput {
+    max-width: 80px;
+}
+
+.filenameInput {
+    max-width: 150px;
+}
+
+.marginBottom15 {
+    margin-bottom: 15px;
+}
+
+.m5Token {
+    min-width: 300px;
+    max-width: 300px;
+}
+
+.version {
+    min-width: 400px;
+    max-width: 400px;
+}
+
+.token {
+    min-width: 400px;
+    max-width: 400px;
+}
+
+.numImages {
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.templates {
+    min-width: 400px;
+    max-width: 400px;
+}
+
+.docids {
+    min-width: 400px;
+    max-width: 400px;
+}
+
+.imageDimensions {
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.marginLeft50 {
+    margin-left: 50px;
+}
+
+.inputSide {
+    min-width: 600px;
+    max-width: 600px;
+}
+
+.outputSide {
+    margin-top: 5px;
+    min-width: 700px;
+    max-width: 700px;
+}
+
+.respLabel {
+    display: inline-block;
+    vertical-align: top;
+    width: 150px;
+    text-align: right;
+}
+
+input[readonly] {
+    background-color: #F0F0F0;
+}
+
+.connection {
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.templateFields {
+    width: 550px;
+    height: 200px;
+}
+
+
+/* https://stackoverflow.com/a/10801889/2276361 */
+html.wait, html.wait * {
+    cursor: wait !important;
+}
+
+.image {
+    border: 1px solid black;
+    width: 200px;
+    height: 200px;
+}
