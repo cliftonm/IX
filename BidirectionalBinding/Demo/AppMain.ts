@@ -5,17 +5,16 @@
 // And modules in the web.config must be set to: modules="AspNetCoreModule"
 // And the appropriate IIS APPPOOL must be added to the ServiceAccess users.
 
-class ProxyArray<T> {
-    _id: string;
-    _container: any;
-
-    Create(): T[] {
-        let p = new Proxy([] as T[], this.ArrayChangeHandler);
+class ProxyArray {
+    static Create(id:string, container:any): [] {
+        let p = new Proxy([], ProxyArray.ArrayChangeHandler);
+        p._id = id;
+        p._container = container;
 
         return p;
     }
 
-    ArrayChangeHandler = {
+    static ArrayChangeHandler = {
         get: function (obj, prop, receiver) {
             // return true for this special property, so we know that we're dealing with a ProxyArray object.
             if (prop == "_isProxy") {
@@ -63,7 +62,7 @@ class Event {
         this.subscribers.push(new Subscriber(subscriber));
     }
 
-    Innoke(obj: any, oldVal: string, newVal: string): void {
+    Invoke(obj: any, oldVal: string, newVal: string): void {
         this.subscribers.forEach(s => s.Invoke(obj, oldVal, newVal));
     }
 }
@@ -74,7 +73,10 @@ class InputForm {
     // If we don't do this, the container gets a whole bunch of other properties we may not want when those elements change.
     firstName: string;
     lastName: string;
-    // list: string[] = new ProxyArray<string>().Create();
+    x: number;
+    y: number;
+
+    list: string[] = [];
 
     onFirstNameChanged: Event = new Event();
     onLastNameChanged: Event = new Event();
@@ -83,6 +85,7 @@ class InputForm {
 class OutputForm {
     outFirstName: string;
     outLastName: string;
+    sum: number;
 }
 
 export class AppMain {
@@ -99,10 +102,10 @@ export class AppMain {
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";
 
-        //inputForm.list.push("abc");
-        //inputForm.list.push("def");
-        //inputForm.list[1] = "DEF";
-        //inputForm.list.pop();
+        inputForm.list.push("abc");
+        inputForm.list.push("def");
+        inputForm.list[1] = "DEF";
+        inputForm.list.pop();
 
         // Observables is dead:
         // https://www.bitovi.com/blog/long-live-es6-proxies
@@ -134,9 +137,8 @@ export class AppMain {
         Object.keys(container).forEach(k => {
             let name = container[k].constructor.name;
 
-            if (name == "Array" && container[k]._isProxy) {
-                container[k]._id = k;
-                container[k]._container = container;
+            if (name == "Array") {
+                container[k] = ProxyArray.Create(k, container);
             }
         });
 
@@ -145,11 +147,13 @@ export class AppMain {
         // Update the container when the field in the UI changes.
 
         // At the moment, just scan for all the "input" elements.
-        Array.from(root.querySelectorAll('*[id]')).filter(e => e.nodeName == "INPUT").forEach(e => {
-            console.log(`Binding ${e.id}`);
-
-            this.WireUpChangeHandler(document.getElementById(e.id) as HTMLInputElement, container, "change", "Changed");
-        });
+        Array
+            .from(root.querySelectorAll('*[id]'))
+            .filter(e => e.nodeName == "INPUT")
+            .forEach(e => {
+                console.log(`Binding ${e.id}`);
+                this.WireUpChangeHandler(document.getElementById(e.id) as HTMLInputElement, container, "change", "Changed");
+            });
 
         return target;
     }
@@ -168,7 +172,7 @@ export class AppMain {
             container[propName] = newVal;
 
             if (changeHandler) {
-                changeHandler.Invoke(container, oldVal, newVal);
+                (changeHandler as Event).Invoke(container, oldVal, newVal);
             }
         });
     }

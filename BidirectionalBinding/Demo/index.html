@@ -10,14 +10,14 @@
 <body>
     <h2>Bidirectional Binding Demo</h2>
 
-    <div id="inputForm" class="inline" style="max-width:300px">
+    <div id="inputForm" class="inline" style="max-width:400px">
 
         <!--<div class="inline">
-            <div class="inline label">Query:</div>
-            <div class="inline">
-                <select id="queriesList" class="cbFieldInput"></select>
-            </div>
-        </div>-->
+        <div class="inline label">Query:</div>
+        <div class="inline">
+            <select id="queriesList" class="cbFieldInput"></select>
+        </div>
+    </div>-->
 
         <div class="inline marginTop5">
             <div class="inline label">First Name:</div>
@@ -25,12 +25,24 @@
         </div>
 
         <div class="reset"></div>
-
         <div class="inline marginTop5">
             <div class="inline label">Last Name:</div>
             <div class="inline"><input id="lastName" class="fieldInput" /></div>
         </div>
+
+        <div class="reset"></div>
+        <div class="inline marginTop5">
+            <div class="inline labelSmall">X:</div>
+            <div class="inline"><input id="x" class="fieldInputSmall" /></div>
+            <div class="inline labelSmall">Y:</div>
+            <div class="inline"><input id="y" class="fieldInputSmall" /></div>
+        </div>
+
     </div>
+
+
+
+
     <div id="outputForm" class="inline" style="max-width:300px">
         <div class="inline marginTop5">
             <div class="inline label">First Name:</div>
@@ -38,10 +50,15 @@
         </div>
 
         <div class="reset"></div>
-
         <div class="inline marginTop5">
             <div class="inline label">Last Name:</div>
             <div class="inline"><input id="outLastName" class="fieldInput" readonly /></div>
+        </div>
+
+        <div class="reset"></div>
+        <div class="inline marginTop5">
+            <div class="inline label">Sum:</div>
+            <div class="inline"><input id="sum" class="fieldInput" readonly /></div>
         </div>
     </div>
 </body>

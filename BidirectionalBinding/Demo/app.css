@@ -12,6 +12,11 @@
     max-width: 150px;
 }
 
+.fieldInputSmall {
+    min-width: 75px;
+    max-width: 75px;
+}
+
 .filterInput {
     max-width: 140px;
 }
@@ -30,6 +35,12 @@
 .label {
     vertical-align: top;
     min-width: 100px;
+    text-align: right;
+}
+
+.labelSmall {
+    vertical-align: top;
+    min-width: 50px;
     text-align: right;
 }
 
