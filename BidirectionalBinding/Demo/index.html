@@ -10,7 +10,7 @@
 <body>
     <h2>Bidirectional Binding Demo</h2>
 
-    <div style="max-width:400px">
+    <div id="inputForm" class="inline" style="max-width:300px">
 
         <!--<div class="inline">
             <div class="inline label">Query:</div>
@@ -18,8 +18,6 @@
                 <select id="queriesList" class="cbFieldInput"></select>
             </div>
         </div>-->
-
-        <div class="reset"></div>
 
         <div class="inline marginTop5">
             <div class="inline label">First Name:</div>
@@ -31,6 +29,19 @@
         <div class="inline marginTop5">
             <div class="inline label">Last Name:</div>
             <div class="inline"><input id="lastName" class="fieldInput" /></div>
+        </div>
+    </div>
+    <div id="outputForm" class="inline" style="max-width:300px">
+        <div class="inline marginTop5">
+            <div class="inline label">First Name:</div>
+            <div class="inline"><input id="outFirstName" class="fieldInput" readonly /></div>
+        </div>
+
+        <div class="reset"></div>
+
+        <div class="inline marginTop5">
+            <div class="inline label">Last Name:</div>
+            <div class="inline"><input id="outLastName" class="fieldInput" readonly /></div>
         </div>
     </div>
 </body>

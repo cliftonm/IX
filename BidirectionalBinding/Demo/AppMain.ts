@@ -44,33 +44,65 @@ class ProxyArray<T> {
     };
 }
 
-class MainPage {
+class Subscriber {
+    subscriber: (obj: any, oldVal: string, newVal: string) => void;
+
+    constructor(subscriber: (obj: any, oldVal: string, newVal: string) => void) {
+        this.subscriber = subscriber;
+    }
+
+    Invoke(obj: any, oldVal: string, newVal: string): void {
+        this.subscriber(obj, oldVal, newVal);
+    }
+}
+
+class Event {
+    subscribers: Subscriber[] = [];
+
+    Add(subscriber: (obj: any, oldVal: string, newVal: string) => void) {
+        this.subscribers.push(new Subscriber(subscriber));
+    }
+
+    Innoke(obj: any, oldVal: string, newVal: string): void {
+        this.subscribers.forEach(s => s.Invoke(obj, oldVal, newVal));
+    }
+}
+
+class InputForm {
     // If we don't initialize the properties, we can't check if they are in the instance with container.hasOwnProperty("x");
     // Ideally, it's preferable to initialize the property to a value so that we're not wiring up change listeners to elements in which we're not interested for this container.
     // If we don't do this, the container gets a whole bunch of other properties we may not want when those elements change.
     firstName: string;
     lastName: string;
-    list: string[] = new ProxyArray<string>().Create();
+    // list: string[] = new ProxyArray<string>().Create();
 
-    OnFirstNameChanged(me, oldVal, newVal): void {
-        alert(`was: ${oldVal} new: ${newVal} - ${me.tenantName}`);
-    }
+    onFirstNameChanged: Event = new Event();
+    onLastNameChanged: Event = new Event();
+}
 
-    OnLastNameChanged(me, oldVal, newVal): void {
-        alert(`was: ${oldVal} new: ${newVal} - ${me.n}`);
-    }
+class OutputForm {
+    outFirstName: string;
+    outLastName: string;
 }
 
 export class AppMain {
-    public run() {
-        let mainPage = this.WireUpElements(new MainPage());
-        mainPage.firstName = "Marc";
-        mainPage.lastName = "Clifton";
+    public AlertChangedValue(obj, oldVal, newVal) {
+        alert(`was: ${oldVal} new: ${newVal} - ${obj.firstName}`);
+    }
 
-        mainPage.list.push("abc");
-        mainPage.list.push("def");
-        mainPage.list[1] = "DEF";
-        mainPage.list.pop();
+    public run() {
+        let inputForm = this.WireUpElements(new InputForm(), document.getElementById("inputForm"));
+        let outputForm = this.WireUpElements(new OutputForm(), document.getElementById("outputForm"));
+
+        inputForm.onFirstNameChanged.Add((_, __, newVal) => outputForm.outFirstName = newVal);
+        inputForm.onLastNameChanged.Add((_, __, newVal) => outputForm.outLastName = newVal);
+        inputForm.firstName = "Marc";
+        inputForm.lastName = "Clifton";
+
+        //inputForm.list.push("abc");
+        //inputForm.list.push("def");
+        //inputForm.list[1] = "DEF";
+        //inputForm.list.pop();
 
         // Observables is dead:
         // https://www.bitovi.com/blog/long-live-es6-proxies
@@ -78,7 +110,7 @@ export class AppMain {
     }
 
     // Return "any" or interface T if you want intellisense, not "ProxyConstructor", otherwise we get "Property [x] does not exist on ProxyConstructor" error.
-    private WireUpElements<T>(container: T): T {
+    private WireUpElements<T>(container: T, root: HTMLElement): T {
         // update the UI with the container.field = 'some value';
         let uiHandler = {
             get: (obj, prop) => {
@@ -113,25 +145,31 @@ export class AppMain {
         // Update the container when the field in the UI changes.
 
         // At the moment, just scan for all the "input" elements.
-        Array.from(document.querySelectorAll('*[id]')).filter(e => e.nodeName == "INPUT").forEach(e => {
-            (document.getElementById(e.id) as HTMLInputElement).addEventListener("change", ev => {
-                let el = ev.srcElement as HTMLInputElement;
-                let oldVal = container[el.id];
-                let newVal = el.value;
-                let propName = el.id;
-                let ucPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
-                let eventName = `On${ucPropName}Changed`;
-                let changeHandler = container[eventName];
+        Array.from(root.querySelectorAll('*[id]')).filter(e => e.nodeName == "INPUT").forEach(e => {
+            console.log(`Binding ${e.id}`);
 
-                // Update the container
-                container[propName] = newVal;
-
-                if (changeHandler) {
-                    changeHandler(container, oldVal, newVal);
-                }
-            });
+            this.WireUpChangeHandler(document.getElementById(e.id) as HTMLInputElement, container, "change", "Changed");
         });
 
         return target;
+    }
+
+    WireUpChangeHandler<T>(el: HTMLInputElement, container: T, eventName: string, handlerName: string) {
+        el.addEventListener(eventName, ev => {
+            let el = ev.srcElement as HTMLInputElement;
+            let oldVal = container[el.id];
+            let newVal = el.value;
+            let propName = el.id;
+            let ucPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
+            let eventName = `on${ucPropName}${handlerName}`;
+            let changeHandler = container[eventName];
+
+            // Update the container
+            container[propName] = newVal;
+
+            if (changeHandler) {
+                changeHandler.Invoke(container, oldVal, newVal);
+            }
+        });
     }
 }
