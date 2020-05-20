@@ -29,6 +29,8 @@ class InputForm {
     public Add(): number {
         return this.x + this.y;
     }
+
+    mySpan = { title: () => `You loaded this page on ${new Date().toLocaleString()}` };
 }
 
 class OutputForm {
@@ -45,6 +47,9 @@ export class AppMain {
     public run() {
         let ix = new IX();
         let inputForm = ix.CreateProxy(new InputForm());
+
+        let form = new IX().CreateNullProxy();  // no associated view model.
+        form.app = "Hello Interacx!";
 
         // Post wire-up
         // Notice UI elements get set immediately.

@@ -11,10 +11,21 @@ export class IX {
         set: (obj, prop, val) => {
             console.log(`SET: ${prop} to ${val}`);
 
-            // Return true to accept change.  Note that we can implement a "BeforeChange" event call on the container if we want to add logic to accept the change.
-            (document.getElementById(prop) as HTMLInputElement).value = val;
+            let el = document.getElementById(prop);
+
+            switch (el.nodeName) {
+                case "DIV":
+                    (el as HTMLDivElement).innerHTML = val;
+                    break;
+
+                case "INPUT":
+                    (el as HTMLInputElement).value = val;
+                    break;
+            }
+
             obj[prop] = val;
 
+            // Return true to accept change.  Note that we can implement a "BeforeChange" event call on the container if we want to add logic to accept the change.
             return true;
         }
     };
@@ -23,6 +34,12 @@ export class IX {
         this.CreateArrayProxies(container);
         this.CreateHandlers(container);
         let target = new Proxy(container, this.uiHandler);
+
+        return target;
+    }
+
+    public CreateNullProxy(): any {
+        let target = new Proxy({}, this.uiHandler);
 
         return target;
     }
@@ -51,11 +68,17 @@ export class IX {
 
     private CreateHandlers<T>(container: T) {
         Object.keys(container).forEach(k => {
-            let el = document.getElementById(k) as any;
+            let el = document.getElementById(k);
+            let anonEl = el as any;
 
             // If element exists and we haven't assigned a proxy to the container's field, then wire up the events.
-            if (el && !el._proxy) {
-                el._proxy = this;
+            if (el && !anonEl._proxy) {
+                anonEl._proxy = this;
+
+                if (container[k].title) {
+                    // mouse over title event
+                    el.addEventListener("mouseover", _ => el.setAttribute("title", container[k].title()));
+                }
 
                 switch (el.nodeName) {
                     case "INPUT":
@@ -64,15 +87,6 @@ export class IX {
                 }
             }
         });
-/*
-        Array
-            .from(root.querySelectorAll('*[id]'))
-            .filter(e => e.nodeName == nodeName)
-            .forEach(e => {
-                console.log(`Binding ${e.id}`);
-                this.WireUpChangeHandler(document.getElementById(e.id) as HTMLElement, container, propertyName, eventName, handlerName);
-            });
-*/
     }
 
     private WireUpChangeHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
