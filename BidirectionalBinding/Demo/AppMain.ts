@@ -9,18 +9,28 @@ import { IXEvent } from "./Interacx/IXEvent"
 import { IX } from "Interacx/IX"
 
 class InputForm {
-    // If we don't initialize the properties, we can't check if they are in the instance with container.hasOwnProperty("x");
-    // Ideally, it's preferable to initialize the property to a value so that we're not wiring up change listeners to elements in which we're not interested for this container.
-    // If we don't do this, the container gets a whole bunch of other properties we may not want when those elements change.
     firstName: string = "";
     lastName: string = "";
+
+    // Late binding with UpdateProxy after first time initialization.
     x: number;
     y: number;
 
+    // arrays must be initialized.
     list: string[] = [];
 
-    onFirstNameChanged: IXEvent = new IXEvent();
-    onLastNameChanged: IXEvent = new IXEvent();
+    // Event handlers:
+    onFirstNameChanged = new IXEvent();
+    onLastNameChanged = new IXEvent();
+    onXChanged = new IXEvent();
+    onYChanged = new IXEvent();
+
+    onConvertX = x => parseInt(x);
+    onConvertY = y => parseInt(y);
+
+    public Add(): number {
+        return this.x + this.y
+    }
 }
 
 class OutputForm {
@@ -36,11 +46,21 @@ export class AppMain {
 
     public run() {
         let ix = new IX();
-        let inputForm = ix.CreateProxy(new InputForm(), document.getElementById("inputForm"));
-        let outputForm = ix.CreateProxy(new OutputForm(), document.getElementById("outputForm"));
+        let inputForm = ix.CreateProxy(new InputForm());
+
+        // Post wire-up
+        inputForm.x = 1;
+        inputForm.y = 2;
+        ix.UpdateProxy(inputForm);
+
+        let outputForm = ix.CreateProxy(new OutputForm());
 
         inputForm.onFirstNameChanged.Add((_, __, newVal) => outputForm.outFirstName = newVal);
         inputForm.onLastNameChanged.Add((_, __, newVal) => outputForm.outLastName = newVal);
+
+        inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
+        inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
+
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";
 

@@ -19,15 +19,19 @@ export class IX {
         }
     };
 
-    // Return "any" or interface T if you want intellisense, not "ProxyConstructor", otherwise we get "Property [x] does not exist on ProxyConstructor" error.
-    public CreateProxy<T>(container: T, root: HTMLElement): T {
-        // update the UI with the container.field = 'some value';
-
+    public CreateProxy<T>(container: T): T {
         this.CreateArrayProxies(container);
-        this.CreateHandlers(container, root, "INPUT", "value", "change", "Changed");
+        this.CreateHandlers(container);
         let target = new Proxy(container, this.uiHandler);
 
         return target;
+    }
+
+    // For clarity that we're updating the proxy with container properties that now have values.
+    public UpdateProxy<T>(container: T): T {
+        this.CreateProxy(container);
+
+        return container;
     }
 
     private CreateArrayProxies<T>(container: T): void {
@@ -37,13 +41,30 @@ export class IX {
             let name = container[k].constructor.name;
 
             if (name == "Array") {
-                container[k] = IXArrayProxy.Create(k, container);
+                // If container property is already proxied, don't proxy it again!
+                if (container[k]._id != k) {
+                    container[k] = IXArrayProxy.Create(k, container);
+                }
             }
         });
     }
 
-    private CreateHandlers<T>(container: T, root: HTMLElement, nodeName: string, propertyName: string, eventName: string, handlerName: string) {
-        // At the moment, just scan for all the "input" elements.
+    private CreateHandlers<T>(container: T) {
+        Object.keys(container).forEach(k => {
+            let el = document.getElementById(k) as any;
+
+            // If element exists and we haven't assigned a proxy to the container's field, then wire up the events.
+            if (el && !el._proxy) {
+                el._proxy = this;
+
+                switch (el.nodeName) {
+                    case "INPUT":
+                        this.WireUpChangeHandler(el, container, "value", "change", "Changed");
+                        break;
+                }
+            }
+        });
+/*
         Array
             .from(root.querySelectorAll('*[id]'))
             .filter(e => e.nodeName == nodeName)
@@ -51,6 +72,7 @@ export class IX {
                 console.log(`Binding ${e.id}`);
                 this.WireUpChangeHandler(document.getElementById(e.id) as HTMLElement, container, propertyName, eventName, handlerName);
             });
+*/
     }
 
     private WireUpChangeHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
@@ -63,12 +85,22 @@ export class IX {
             let eventName = `on${ucPropName}${handlerName}`;
             let changeHandler = container[eventName];
 
-            // Update the container
-            container[propName] = newVal;
 
             if (changeHandler) {
+                newVal = this.CustomConverter(container, ucPropName, newVal);
+                container[propName] = newVal;
                 (changeHandler as IXEvent).Invoke(container, oldVal, newVal);
             }
         });
+    }
+
+    private CustomConverter<T>(container: T, ucPropName: string, newVal: string): any {
+        let converter = `onConvert${ucPropName}`;
+
+        if (container[converter]) {
+            newVal = container[converter](newVal);
+        }
+
+        return newVal;
     }
 }
