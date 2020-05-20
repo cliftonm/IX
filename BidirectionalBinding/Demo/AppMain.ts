@@ -1,9 +1,6 @@
-﻿// To host this with IIS, the IIS Hosting bundle must be installed:
-// https://dotnet.microsoft.com/download/dotnet-core/thank-you/runtime-aspnetcore-2.1.3-windows-hosting-bundle-installer
-// Read more: https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/?view=aspnetcore-3.1
-// Also, the latest version of TypeScript must be installed: https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.typescript-351
-// And modules in the web.config must be set to: modules="AspNetCoreModule"
-// And the appropriate IIS APPPOOL must be added to the ServiceAccess users.
+﻿// Observables is dead:
+// https://www.bitovi.com/blog/long-live-es6-proxies
+// https://esdiscuss.org/topic/an-update-on-object-observe
 
 import { IXEvent } from "./Interacx/IXEvent"
 import { IX } from "Interacx/IX"
@@ -25,11 +22,12 @@ class InputForm {
     onXChanged = new IXEvent();
     onYChanged = new IXEvent();
 
-    onConvertX = x => parseInt(x);
-    onConvertY = y => parseInt(y);
+    // Converters, so 1 + 2 != '12'
+    onConvertX = x => Number(x);
+    onConvertY = y => Number(y);
 
     public Add(): number {
-        return this.x + this.y
+        return this.x + this.y;
     }
 }
 
@@ -49,14 +47,17 @@ export class AppMain {
         let inputForm = ix.CreateProxy(new InputForm());
 
         // Post wire-up
+        // Notice UI elements get set immediately.
         inputForm.x = 1;
         inputForm.y = 2;
+
+        // This does a post-wire-up of the change event handler for x and y now that they exist.
         ix.UpdateProxy(inputForm);
 
         let outputForm = ix.CreateProxy(new OutputForm());
 
-        inputForm.onFirstNameChanged.Add((_, __, newVal) => outputForm.outFirstName = newVal);
-        inputForm.onLastNameChanged.Add((_, __, newVal) => outputForm.outLastName = newVal);
+        inputForm.onFirstNameChanged.Add(newVal => outputForm.outFirstName = newVal);
+        inputForm.onLastNameChanged.Add(newVal => outputForm.outLastName = newVal);
 
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
@@ -68,10 +69,5 @@ export class AppMain {
         inputForm.list.push("def");
         inputForm.list[1] = "DEF";
         inputForm.list.pop();
-
-        // Observables is dead:
-        // https://www.bitovi.com/blog/long-live-es6-proxies
-        // https://esdiscuss.org/topic/an-update-on-object-observe
     }
-
 }

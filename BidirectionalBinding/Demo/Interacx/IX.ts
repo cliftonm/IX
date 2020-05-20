@@ -89,7 +89,7 @@ export class IX {
             if (changeHandler) {
                 newVal = this.CustomConverter(container, ucPropName, newVal);
                 container[propName] = newVal;
-                (changeHandler as IXEvent).Invoke(container, oldVal, newVal);
+                (changeHandler as IXEvent).Invoke(newVal, container, oldVal);
             }
         });
     }
