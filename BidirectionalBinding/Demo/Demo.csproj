@@ -85,6 +85,10 @@
   <ItemGroup>
     <TypeScriptCompile Include="AppConfig.ts" />
     <TypeScriptCompile Include="AppMain.ts" />
+    <TypeScriptCompile Include="Interacx\IXArrayProxy.ts" />
+    <TypeScriptCompile Include="Interacx\IXEvent.ts" />
+    <TypeScriptCompile Include="Interacx\IX.ts" />
+    <TypeScriptCompile Include="Interacx\IXSubscriber.ts" />
     <TypeScriptCompile Include="modules\require.d.ts" />
   </ItemGroup>
   <ItemGroup>
