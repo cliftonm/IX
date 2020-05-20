@@ -20,9 +20,17 @@ export class IX {
     };
 
     // Return "any" or interface T if you want intellisense, not "ProxyConstructor", otherwise we get "Property [x] does not exist on ProxyConstructor" error.
-    public WireUpElements<T>(container: T, root: HTMLElement): T {
+    public CreateProxy<T>(container: T, root: HTMLElement): T {
         // update the UI with the container.field = 'some value';
 
+        this.CreateArrayProxies(container);
+        this.CreateHandlers(container, root, "INPUT", "value", "change", "Changed");
+        let target = new Proxy(container, this.uiHandler);
+
+        return target;
+    }
+
+    private CreateArrayProxies<T>(container: T): void {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
         // the proxy is operating on the array, not the container's property of the array.
         Object.keys(container).forEach(k => {
@@ -32,28 +40,24 @@ export class IX {
                 container[k] = IXArrayProxy.Create(k, container);
             }
         });
+    }
 
-        let target = new Proxy(container, this.uiHandler);
-
-        // Update the container when the field in the UI changes.
-
+    private CreateHandlers<T>(container: T, root: HTMLElement, nodeName: string, propertyName: string, eventName: string, handlerName: string) {
         // At the moment, just scan for all the "input" elements.
         Array
             .from(root.querySelectorAll('*[id]'))
-            .filter(e => e.nodeName == "INPUT")
+            .filter(e => e.nodeName == nodeName)
             .forEach(e => {
                 console.log(`Binding ${e.id}`);
-                this.WireUpChangeHandler(document.getElementById(e.id) as HTMLInputElement, container, "change", "Changed");
+                this.WireUpChangeHandler(document.getElementById(e.id) as HTMLElement, container, propertyName, eventName, handlerName);
             });
-
-        return target;
     }
 
-    public WireUpChangeHandler<T>(el: HTMLInputElement, container: T, eventName: string, handlerName: string) {
+    private WireUpChangeHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
         el.addEventListener(eventName, ev => {
-            let el = ev.srcElement as HTMLInputElement;
+            let el = ev.srcElement as HTMLElement;
             let oldVal = container[el.id];
-            let newVal = el.value;
+            let newVal = el[propertyName];
             let propName = el.id;
             let ucPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
             let eventName = `on${ucPropName}${handlerName}`;

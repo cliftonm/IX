@@ -22,10 +22,6 @@
             return obj[prop];
         },
         set: function (obj, prop, val, receiver) {
-            if (prop == "length") {
-                console.log(`Current length = ${obj[prop]}`);
-            }
-
             console.log('setting ' + prop + ' for ' + receiver._id + ' with value ' + val);
 
             // Return true to accept change.  Note that we can implement a "BeforeChange" event call on the container if we want to add logic to accept the change.

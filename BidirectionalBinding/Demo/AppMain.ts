@@ -36,8 +36,8 @@ export class AppMain {
 
     public run() {
         let ix = new IX();
-        let inputForm = ix.WireUpElements(new InputForm(), document.getElementById("inputForm"));
-        let outputForm = ix.WireUpElements(new OutputForm(), document.getElementById("outputForm"));
+        let inputForm = ix.CreateProxy(new InputForm(), document.getElementById("inputForm"));
+        let outputForm = ix.CreateProxy(new OutputForm(), document.getElementById("outputForm"));
 
         inputForm.onFirstNameChanged.Add((_, __, newVal) => outputForm.outFirstName = newVal);
         inputForm.onLastNameChanged.Add((_, __, newVal) => outputForm.outLastName = newVal);
