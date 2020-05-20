@@ -32,7 +32,8 @@ export class IX {
 
     public CreateProxy<T>(container: T): T {
         this.CreateArrayProxies(container);
-        this.CreateHandlers(container);
+        this.CreatePropertyHandlers(container);
+        this.CreateButtonHandlers(container);
         let target = new Proxy(container, this.uiHandler);
 
         return target;
@@ -66,7 +67,7 @@ export class IX {
         });
     }
 
-    private CreateHandlers<T>(container: T) {
+    private CreatePropertyHandlers<T>(container: T) {
         Object.keys(container).forEach(k => {
             let el = document.getElementById(k);
             let anonEl = el as any;
@@ -75,6 +76,8 @@ export class IX {
             if (el && !anonEl._proxy) {
                 anonEl._proxy = this;
 
+                let t = typeof container[k];
+
                 if (container[k].title) {
                     // mouse over title event
                     el.addEventListener("mouseover", _ => el.setAttribute("title", container[k].title()));
@@ -82,8 +85,37 @@ export class IX {
 
                 switch (el.nodeName) {
                     case "INPUT":
+                        // TODO: If this is a button type, then what?
                         this.WireUpChangeHandler(el, container, "value", "change", "Changed");
                         break;
+                }
+            }
+        });
+    }
+
+    private CreateButtonHandlers<T>(container: T) {
+        Object.keys(container).forEach(k => {
+            if (k.startsWith("on")) {
+                let handlerName = k.substring(2);
+                let elName = this.LowerCaseFirstChar(handlerName);
+                let el = document.getElementById(elName);
+                let anonEl = el as any;
+
+                if (el && !anonEl._proxy) {
+                    anonEl._proxy = this;
+
+                    switch (el.nodeName) {
+                        case "BUTTON":
+                            this.WireUpChangeHandler(el, container, null, "click", handlerName);
+                            break;
+
+                        case "INPUT":
+                            // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
+                            if (el.getAttribute("type") == "button") {
+                                this.WireUpChangeHandler(el, container, null, "click", handlerName);
+                            }
+                            break;
+                    }
                 }
             }
         });
@@ -92,20 +124,38 @@ export class IX {
     private WireUpChangeHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
         el.addEventListener(eventName, ev => {
             let el = ev.srcElement as HTMLElement;
-            let oldVal = container[el.id];
-            let newVal = el[propertyName];
-            let propName = el.id;
-            let ucPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
+            let oldVal = undefined;
+            let newVal = undefined;
+            let propName = undefined;
+
+            // buttons are click events, not change properties.
+            if (propertyName) {
+                oldVal = container[el.id];
+                newVal = el[propertyName];
+                propName = el.id;
+            }
+
+            let ucPropName = this.UpperCaseFirstChar(propName ?? "");
             let eventName = `on${ucPropName}${handlerName}`;
-            let changeHandler = container[eventName];
+            let handler = container[eventName];
 
+            if (handler) {
+                if (propertyName) {
+                    newVal = this.CustomConverter(container, ucPropName, newVal);
+                    container[propName] = newVal;
+                }
 
-            if (changeHandler) {
-                newVal = this.CustomConverter(container, ucPropName, newVal);
-                container[propName] = newVal;
-                (changeHandler as IXEvent).Invoke(newVal, container, oldVal);
+                (handler as IXEvent).Invoke(newVal, container, oldVal);
             }
         });
+    }
+
+    private LowerCaseFirstChar(s: string): string {
+        return s.charAt(0).toLowerCase() + s.slice(1);
+    }
+
+    private UpperCaseFirstChar(s: string): string {
+        return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
     private CustomConverter<T>(container: T, ucPropName: string, newVal: string): any {

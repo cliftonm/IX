@@ -26,6 +26,9 @@ class InputForm {
     onConvertX = x => Number(x);
     onConvertY = y => Number(y);
 
+    onShow = new IXEvent();
+    onHide = new IXEvent();
+
     public Add(): number {
         return this.x + this.y;
     }
@@ -66,6 +69,9 @@ export class AppMain {
 
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
+
+        inputForm.onShow.Add(() => alert("Show"));
+        inputForm.onHide.Add(() => alert("Hide"));
 
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";
