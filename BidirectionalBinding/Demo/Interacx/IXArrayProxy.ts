@@ -1,5 +1,5 @@
 ﻿export class IXArrayProxy {
-    static Create(id: string, container: any): [] {
+    static Create(id: string, container: any): any {
         let p = new Proxy([], IXArrayProxy.ArrayChangeHandler);
         p._id = id;
         p._container = container;
@@ -21,6 +21,7 @@
 
             return obj[prop];
         },
+
         set: function (obj, prop, val, receiver) {
             console.log('setting ' + prop + ' for ' + receiver._id + ' with value ' + val);
 

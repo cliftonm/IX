@@ -34,6 +34,7 @@ class InputForm {
     }
 
     mySpan = { title: () => `You loaded this page on ${new Date().toLocaleString()}` };
+    seen = {visibility: "visible"};  // for setting attributes.
 }
 
 class OutputForm {
@@ -70,8 +71,8 @@ export class AppMain {
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
 
-        inputForm.onShow.Add(() => alert("Show"));
-        inputForm.onHide.Add(() => alert("Hide"));
+        inputForm.onShow.Add(() => inputForm.seen.visibility = "visible");
+        inputForm.onHide.Add(() => inputForm.seen.visibility = "hidden");
 
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";

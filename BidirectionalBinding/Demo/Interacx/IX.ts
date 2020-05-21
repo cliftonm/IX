@@ -1,4 +1,5 @@
 ﻿import { IXArrayProxy } from "./IXArrayProxy"
+import { IXAttributeProxy } from "./IXAttributeProxy"
 import { IXEvent } from "./IXEvent"
 
 export class IX {
@@ -56,7 +57,7 @@ export class IX {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
         // the proxy is operating on the array, not the container's property of the array.
         Object.keys(container).forEach(k => {
-            let name = container[k].constructor.name;
+            let name = container[k].constructor?.name;
 
             if (name == "Array") {
                 // If container property is already proxied, don't proxy it again!
@@ -77,6 +78,12 @@ export class IX {
                 anonEl._proxy = this;
 
                 let t = typeof container[k];
+
+                // TODO: Would be really helpful if we knew this was an attribute container, not just "an object."
+                if (t == "object") {
+                    // Proxy the object so we can intercept the setter for attributes
+                    container[k] = IXAttributeProxy.Create(k, container[k]);
+                }
 
                 if (container[k].title) {
                     // mouse over title event
