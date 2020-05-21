@@ -2,6 +2,13 @@
 // https://www.bitovi.com/blog/long-live-es6-proxies
 // https://esdiscuss.org/topic/an-update-on-object-observe
 
+/*
+ For reference because I always forget:
+    interface IKeyValueDictionary {
+        [key: string]: any;
+}
+*/
+
 import { IXEvent } from "./Interacx/IXEvent"
 import { IX } from "Interacx/IX"
 
@@ -34,7 +41,9 @@ class InputForm {
     }
 
     mySpan = { title: () => `You loaded this page on ${new Date().toLocaleString()}` };
-    seen = {visibility: "visible"};  // for setting attributes.
+    seen = {
+        attr: { visible: true }
+    };
 }
 
 class OutputForm {
@@ -71,8 +80,8 @@ export class AppMain {
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
 
-        inputForm.onShow.Add(() => inputForm.seen.visibility = "visible");
-        inputForm.onHide.Add(() => inputForm.seen.visibility = "hidden");
+        inputForm.onShow.Add(() => inputForm.seen.attr.visible = true);
+        inputForm.onHide.Add(() => inputForm.seen.attr.visible = false);
 
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";

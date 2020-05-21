@@ -77,12 +77,9 @@ export class IX {
             if (el && !anonEl._proxy) {
                 anonEl._proxy = this;
 
-                let t = typeof container[k];
-
-                // TODO: Would be really helpful if we knew this was an attribute container, not just "an object."
-                if (t == "object") {
-                    // Proxy the object so we can intercept the setter for attributes
-                    container[k] = IXAttributeProxy.Create(k, container[k]);
+                if (container[k].attr) {
+                    // Proxy the attributes of the container so we can intercept the setter for attributes
+                    container[k].attr = IXAttributeProxy.Create(k, container[k].attr);
                 }
 
                 if (container[k].title) {

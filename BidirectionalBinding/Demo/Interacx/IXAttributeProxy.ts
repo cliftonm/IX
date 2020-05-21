@@ -27,8 +27,8 @@
                 let el = document.getElementById(id);
 
                 if (el) {
-                    if (prop == "visibility") {
-                        val = el.style.visibility;
+                    if (prop == "visible") {
+                        val = el.style.visibility == "visible";
                     } else {
                         val = el.getAttribute(prop);
                     }
@@ -47,8 +47,8 @@
                 let el = document.getElementById(receiver._id);
 
                 if (el) {
-                    if (prop == "visibility") {
-                        el.style.visibility = val;
+                    if (prop == "visible") {
+                        el.style.visibility = val ? "visible" : "hidden";
                     } else {
                         el.setAttribute(prop, val);
                     }
