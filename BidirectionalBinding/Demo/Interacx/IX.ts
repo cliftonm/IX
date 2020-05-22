@@ -100,7 +100,7 @@ export class IX {
                     switch (el.nodeName) {
                         case "INPUT":
                             // TODO: If this is a button type, then what?
-                            this.WireUpEventHandler(el, container, "value", "change", "Changed");
+                            this.WireUpEventHandler(el, container, "value", "change", `${idName}Changed`);
                             break;
                     }
                 }
@@ -151,7 +151,8 @@ export class IX {
             }
 
             let ucPropName = this.UpperCaseFirstChar(propName ?? "");
-            let eventName = `on${ucPropName}${handlerName}`;
+            // let eventName = `on${ucPropName}${handlerName}`;
+            let eventName = `on${handlerName}`;
             let handler = container[eventName];
 
             if (handler) {
