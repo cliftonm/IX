@@ -35,7 +35,6 @@ class InputForm {
 
     onShowClicked = new IXEvent();
     onHideClicked = new IXEvent();
-    onMySpanHover = new IXEvent();
 
     public Add(): number {
         return this.x + this.y;
@@ -43,13 +42,25 @@ class InputForm {
 
     // mySpan = { title: () => `You loaded this page on ${new Date().toLocaleString()}` };
 
+}
+
+class HoverExample {
     mySpan = {
         attr: { title: "" }
     };
 
+    onMySpanHover = new IXEvent();
+}
+
+class VisibilityExample {
     seen = {
         attr: { visible: true }
     };
+}
+
+class ReverseExample {
+    message = "Hello From Interacx!";
+    onReverseMessageClicked = new IXEvent().Add((_, container: ReverseExample) => container.message = container.message.split('').reverse().join(''));
 }
 
 class OutputForm {
@@ -64,9 +75,19 @@ export class AppMain {
     }
 
     public run() {
+        IX.CreateProxy(new ReverseExample());
+
+        let hform = IX.CreateProxy(new HoverExample());
+        hform
+            .onMySpanHover
+            .Add(() =>
+                hform.mySpan.attr.title = `You loaded this page on ${new Date().toLocaleString()}`);
+
+        let vform = IX.CreateProxy(new VisibilityExample());
+
         let inputForm = IX.CreateProxy(new InputForm());
 
-        let form = IX.CreateNullProxy();  // no associated view model.
+        let form = IX.CreateNullProxy();  // No associated view model.
         form.app = "Hello Interacx!";
 
         // Post wire-up
@@ -85,10 +106,8 @@ export class AppMain {
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
 
-        inputForm.onMySpanHover.Add(() => inputForm.mySpan.attr.title = `You loaded this page on ${new Date().toLocaleString()}`);
-
-        inputForm.onShowClicked.Add(() => inputForm.seen.attr.visible = true);
-        inputForm.onHideClicked.Add(() => inputForm.seen.attr.visible = false);
+        inputForm.onShowClicked.Add(() => vform.seen.attr.visible = true);
+        inputForm.onHideClicked.Add(() => vform.seen.attr.visible = false);
 
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";

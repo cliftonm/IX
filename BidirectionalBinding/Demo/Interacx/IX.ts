@@ -16,7 +16,8 @@ export class IX {
 
             switch (el.nodeName) {
                 case "DIV":
-                    (el as HTMLDivElement).innerHTML = val;
+                case "P":
+                    (el as HTMLElement).innerHTML = val;
                     break;
 
                 case "INPUT":
@@ -32,10 +33,16 @@ export class IX {
     };
 
     public static CreateProxy<T>(container: T): T {
-        IX.CreateArrayProxies(container);
-        IX.CreatePropertyHandlers(container);
-        IX.CreateButtonHandlers(container);
         let target = new Proxy(container, IX.uiHandler);
+        IX.CreateArrayProxies(container, target);
+        IX.CreatePropertyHandlers(container, target);
+        IX.CreateButtonHandlers(container, target);
+
+        Object.keys(container).forEach(k => {
+            if (k=="message") {
+                target[k] = container[k];        // Force the proxy to handle the initial value.
+            }
+        });
 
         return target;
     }
@@ -53,7 +60,7 @@ export class IX {
         return container;
     }
 
-    private static CreateArrayProxies<T>(container: T): void {
+    private static CreateArrayProxies<T>(container: T, target: T): void {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
         // the proxy is operating on the array, not the container's property of the array.
         Object.keys(container).forEach(k => {
@@ -68,7 +75,7 @@ export class IX {
         });
     }
 
-    private static CreatePropertyHandlers<T>(container: T) {
+    private static CreatePropertyHandlers<T>(container: T, target: T) {
         Object.keys(container).forEach(k => {
             let el = document.getElementById(k);
             let anonEl = el as any;
@@ -93,14 +100,14 @@ export class IX {
                 let hoverEvent = `on${idName}Hover`;
 
                 if (container[hoverEvent]) {
-                    IX.WireUpEventHandler(el, container, null, "mouseover", hoverEvent);
+                    IX.WireUpEventHandler(el, container, target, null, "mouseover", hoverEvent);
                 }
 
                 if (container[changedEvent]) {
                     switch (el.nodeName) {
                         case "INPUT":
                             // TODO: If this is a button type, then what?
-                            IX.WireUpEventHandler(el, container, "value", "change", changedEvent);
+                            IX.WireUpEventHandler(el, container, target, "value", "change", changedEvent);
                             break;
                     }
                 }
@@ -108,7 +115,7 @@ export class IX {
         });
     }
 
-    private static CreateButtonHandlers<T>(container: T) {
+    private static CreateButtonHandlers<T>(container: T, target: T) {
         Object.keys(container).forEach(k => {
             if (k.startsWith("on") && k.endsWith("Clicked")) {
                 let elName = IX.LeftOf(IX.LowerCaseFirstChar(k.substring(2)), "Clicked");
@@ -120,13 +127,13 @@ export class IX {
 
                     switch (el.nodeName) {
                         case "BUTTON":
-                            IX.WireUpEventHandler(el, container, null, "click", k);
+                            IX.WireUpEventHandler(el, container, target, null, "click", k);
                             break;
 
                         case "INPUT":
                             // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
                             if (el.getAttribute("type") == "button") {
-                                IX.WireUpEventHandler(el, container, null, "click", k);
+                                IX.WireUpEventHandler(el, container, target, null, "click", k);
                             }
                             break;
                     }
@@ -135,7 +142,7 @@ export class IX {
         });
     }
 
-    private static WireUpEventHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
+    private static WireUpEventHandler<T>(el: HTMLElement, container: T, target: T, propertyName: string, eventName: string, handlerName: string) {
         el.addEventListener(eventName, ev => {
             let el = ev.srcElement as HTMLElement;
             let oldVal = undefined;
@@ -156,11 +163,11 @@ export class IX {
 
             if (handler) {
                 if (propertyName) {
-                    newVal = IX.CustomConverter(container, ucPropName, newVal);
+                    newVal = IX.CustomConverter(target, ucPropName, newVal);
                     container[propName] = newVal;
                 }
 
-                (handler as IXEvent).Invoke(newVal, container, oldVal);
+                (handler as IXEvent).Invoke(newVal, target, oldVal);
             }
         });
     }
