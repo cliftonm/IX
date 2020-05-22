@@ -93,14 +93,14 @@ export class IX {
                 let hoverEvent = `on${idName}Hover`;
 
                 if (container[hoverEvent]) {
-                    this.WireUpEventHandler(el, container, null, "mouseover", `${idName}Hover`);
+                    this.WireUpEventHandler(el, container, null, "mouseover", hoverEvent);
                 }
 
                 if (container[changedEvent]) {
                     switch (el.nodeName) {
                         case "INPUT":
                             // TODO: If this is a button type, then what?
-                            this.WireUpEventHandler(el, container, "value", "change", `${idName}Changed`);
+                            this.WireUpEventHandler(el, container, "value", "change", changedEvent);
                             break;
                     }
                 }
@@ -111,8 +111,7 @@ export class IX {
     private CreateButtonHandlers<T>(container: T) {
         Object.keys(container).forEach(k => {
             if (k.startsWith("on") && k.endsWith("Clicked")) {
-                let handlerName = k.substring(2);
-                let elName = this.LeftOf(this.LowerCaseFirstChar(handlerName), "Clicked");
+                let elName = this.LeftOf(this.LowerCaseFirstChar(k.substring(2)), "Clicked");
                 let el = document.getElementById(elName);
                 let anonEl = el as any;
 
@@ -121,13 +120,13 @@ export class IX {
 
                     switch (el.nodeName) {
                         case "BUTTON":
-                            this.WireUpEventHandler(el, container, null, "click", handlerName);
+                            this.WireUpEventHandler(el, container, null, "click", k);
                             break;
 
                         case "INPUT":
                             // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
                             if (el.getAttribute("type") == "button") {
-                                this.WireUpEventHandler(el, container, null, "click", handlerName);
+                                this.WireUpEventHandler(el, container, null, "click", k);
                             }
                             break;
                     }
@@ -152,8 +151,8 @@ export class IX {
 
             let ucPropName = this.UpperCaseFirstChar(propName ?? "");
             // let eventName = `on${ucPropName}${handlerName}`;
-            let eventName = `on${handlerName}`;
-            let handler = container[eventName];
+            // let eventName = `on${handlerName}`;
+            let handler = container[handlerName];
 
             if (handler) {
                 if (propertyName) {
