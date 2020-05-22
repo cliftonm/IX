@@ -33,24 +33,32 @@ export class IX {
     };
 
     public static CreateProxy<T>(container: T): T {
-        let target = new Proxy(container, IX.uiHandler);
-        IX.CreateArrayProxies(container, target);
-        IX.CreatePropertyHandlers(container, target);
-        IX.CreateButtonHandlers(container, target);
+        let proxy = new Proxy(container, IX.uiHandler);
+        IX.CreateArrayProxies(container, proxy);
+        IX.CreatePropertyHandlers(container, proxy);
+        IX.CreateButtonHandlers(container, proxy);
 
         Object.keys(container).forEach(k => {
-            if (k=="message") {
-                target[k] = container[k];        // Force the proxy to handle the initial value.
+            let name = container[k].constructor?.name;
+
+            switch (name) {
+                case "String":
+                case "Number":
+                case "Boolean":
+                case "BigInt":
+                    // case Array???
+                    proxy[k] = container[k];        // Force the proxy to handle the initial value.
+                    break;
             }
         });
 
-        return target;
+        return proxy;
     }
 
     public static CreateNullProxy(): any {
-        let target = new Proxy({}, IX.uiHandler);
+        let proxy = new Proxy({}, IX.uiHandler);
 
-        return target;
+        return proxy;
     }
 
     // For clarity that we're updating the proxy with container properties that now have values.
@@ -60,7 +68,7 @@ export class IX {
         return container;
     }
 
-    private static CreateArrayProxies<T>(container: T, target: T): void {
+    private static CreateArrayProxies<T>(container: T, proxy: T): void {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
         // the proxy is operating on the array, not the container's property of the array.
         Object.keys(container).forEach(k => {
@@ -75,7 +83,7 @@ export class IX {
         });
     }
 
-    private static CreatePropertyHandlers<T>(container: T, target: T) {
+    private static CreatePropertyHandlers<T>(container: T, proxy: T) {
         Object.keys(container).forEach(k => {
             let el = document.getElementById(k);
             let anonEl = el as any;
@@ -100,14 +108,14 @@ export class IX {
                 let hoverEvent = `on${idName}Hover`;
 
                 if (container[hoverEvent]) {
-                    IX.WireUpEventHandler(el, container, target, null, "mouseover", hoverEvent);
+                    IX.WireUpEventHandler(el, container, proxy, null, "mouseover", hoverEvent);
                 }
 
                 if (container[changedEvent]) {
                     switch (el.nodeName) {
                         case "INPUT":
                             // TODO: If this is a button type, then what?
-                            IX.WireUpEventHandler(el, container, target, "value", "change", changedEvent);
+                            IX.WireUpEventHandler(el, container, proxy, "value", "change", changedEvent);
                             break;
                     }
                 }
@@ -115,7 +123,7 @@ export class IX {
         });
     }
 
-    private static CreateButtonHandlers<T>(container: T, target: T) {
+    private static CreateButtonHandlers<T>(container: T, proxy: T) {
         Object.keys(container).forEach(k => {
             if (k.startsWith("on") && k.endsWith("Clicked")) {
                 let elName = IX.LeftOf(IX.LowerCaseFirstChar(k.substring(2)), "Clicked");
@@ -127,13 +135,13 @@ export class IX {
 
                     switch (el.nodeName) {
                         case "BUTTON":
-                            IX.WireUpEventHandler(el, container, target, null, "click", k);
+                            IX.WireUpEventHandler(el, container, proxy, null, "click", k);
                             break;
 
                         case "INPUT":
                             // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
                             if (el.getAttribute("type") == "button") {
-                                IX.WireUpEventHandler(el, container, target, null, "click", k);
+                                IX.WireUpEventHandler(el, container, proxy, null, "click", k);
                             }
                             break;
                     }
@@ -142,7 +150,7 @@ export class IX {
         });
     }
 
-    private static WireUpEventHandler<T>(el: HTMLElement, container: T, target: T, propertyName: string, eventName: string, handlerName: string) {
+    private static WireUpEventHandler<T>(el: HTMLElement, container: T, proxy: T, propertyName: string, eventName: string, handlerName: string) {
         el.addEventListener(eventName, ev => {
             let el = ev.srcElement as HTMLElement;
             let oldVal = undefined;
@@ -163,11 +171,11 @@ export class IX {
 
             if (handler) {
                 if (propertyName) {
-                    newVal = IX.CustomConverter(target, ucPropName, newVal);
+                    newVal = IX.CustomConverter(proxy, ucPropName, newVal);
                     container[propName] = newVal;
                 }
 
-                (handler as IXEvent).Invoke(newVal, target, oldVal);
+                (handler as IXEvent).Invoke(newVal, proxy, oldVal);
             }
         });
     }

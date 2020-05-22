@@ -33,9 +33,6 @@ class InputForm {
     onConvertX = x => Number(x);
     onConvertY = y => Number(y);
 
-    onShowClicked = new IXEvent();
-    onHideClicked = new IXEvent();
-
     public Add(): number {
         return this.x + this.y;
     }
@@ -56,11 +53,14 @@ class VisibilityExample {
     seen = {
         attr: { visible: true }
     };
+
+    onShowClicked = new IXEvent().Add((_, p) => p.seen.attr.visible = true);
+    onHideClicked = new IXEvent().Add((_, p) => p.seen.attr.visible = false);
 }
 
 class ReverseExample {
     message = "Hello From Interacx!";
-    onReverseMessageClicked = new IXEvent().Add((_, container: ReverseExample) => container.message = container.message.split('').reverse().join(''));
+    onReverseMessageClicked = new IXEvent().Add((_, p: ReverseExample) => p.message = p.message.split('').reverse().join(''));
 }
 
 class OutputForm {
@@ -83,17 +83,12 @@ export class AppMain {
             .Add(() =>
                 hform.mySpan.attr.title = `You loaded this page on ${new Date().toLocaleString()}`);
 
-        let vform = IX.CreateProxy(new VisibilityExample());
+        IX.CreateProxy(new VisibilityExample());
 
         let inputForm = IX.CreateProxy(new InputForm());
 
         let form = IX.CreateNullProxy();  // No associated view model.
         form.app = "Hello Interacx!";
-
-        // Post wire-up
-        // Notice UI elements get set immediately.
-        inputForm.x = 1;
-        inputForm.y = 2;
 
         // This does a post-wire-up of the change event handler for x and y now that they exist.
         IX.UpdateProxy(inputForm);
@@ -106,8 +101,11 @@ export class AppMain {
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
 
-        inputForm.onShowClicked.Add(() => vform.seen.attr.visible = true);
-        inputForm.onHideClicked.Add(() => vform.seen.attr.visible = false);
+        // Post wire-up
+        // Notice UI elements get set immediately.
+        // TODO: Fire any onConvert and onChanged events!
+        inputForm.x = 1;
+        inputForm.y = 2;
 
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";

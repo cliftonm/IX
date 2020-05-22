@@ -229,3 +229,7 @@ html.wait, html.wait * {
     width: 200px;
     height: 200px;
 }
+
+p {
+    margin:0;
+}
