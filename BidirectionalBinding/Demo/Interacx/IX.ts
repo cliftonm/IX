@@ -79,6 +79,7 @@ export class IX {
 
                 if (container[k].attr) {
                     // Proxy the attributes of the container so we can intercept the setter for attributes
+                    console.log(`Creating proxy for attr ${k}`);
                     container[k].attr = IXAttributeProxy.Create(k, container[k].attr);
                 }
 
@@ -87,11 +88,21 @@ export class IX {
                 //    el.addEventListener("mouseover", _ => el.setAttribute("title", container[k].title()));
                 //}
 
-                switch (el.nodeName) {
-                    case "INPUT":
-                        // TODO: If this is a button type, then what?
-                        this.WireUpEventHandler(el, container, "value", "change", "Changed");
-                        break;
+                let idName = this.UpperCaseFirstChar(el.id);
+                let changedEvent = `on${idName}Changed`;
+                let hoverEvent = `on${idName}Hover`;
+
+                if (container[hoverEvent]) {
+                    this.WireUpEventHandler(el, container, null, "mouseover", `${idName}Hover`);
+                }
+
+                if (container[changedEvent]) {
+                    switch (el.nodeName) {
+                        case "INPUT":
+                            // TODO: If this is a button type, then what?
+                            this.WireUpEventHandler(el, container, "value", "change", "Changed");
+                            break;
+                    }
                 }
             }
         });
@@ -99,9 +110,9 @@ export class IX {
 
     private CreateButtonHandlers<T>(container: T) {
         Object.keys(container).forEach(k => {
-            if (k.startsWith("on")) {
+            if (k.startsWith("on") && k.endsWith("Clicked")) {
                 let handlerName = k.substring(2);
-                let elName = this.LowerCaseFirstChar(handlerName);
+                let elName = this.LeftOf(this.LowerCaseFirstChar(handlerName), "Clicked");
                 let el = document.getElementById(elName);
                 let anonEl = el as any;
 
@@ -118,10 +129,6 @@ export class IX {
                             if (el.getAttribute("type") == "button") {
                                 this.WireUpEventHandler(el, container, null, "click", handlerName);
                             }
-                            break;
-
-                        default:
-                            this.WireUpEventHandler(el, container, null, "mouseover", handlerName);
                             break;
                     }
                 }
@@ -156,6 +163,10 @@ export class IX {
                 (handler as IXEvent).Invoke(newVal, container, oldVal);
             }
         });
+    }
+
+    private LeftOf(s: string, search: string): string {
+        return s.substring(0, s.indexOf(search));
     }
 
     private LowerCaseFirstChar(s: string): string {

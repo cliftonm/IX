@@ -33,8 +33,8 @@ class InputForm {
     onConvertX = x => Number(x);
     onConvertY = y => Number(y);
 
-    onShow = new IXEvent();
-    onHide = new IXEvent();
+    onShowClicked = new IXEvent();
+    onHideClicked = new IXEvent();
     onMySpanHover = new IXEvent();
 
     public Add(): number {
@@ -86,9 +86,10 @@ export class AppMain {
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
 
-        inputForm.onMySpanHover.Add(() => () => inputForm.mySpan.attr.title = `You loaded this page on ${new Date().toLocaleString()}`);
-        inputForm.onShow.Add(() => inputForm.seen.attr.visible = true);
-        inputForm.onHide.Add(() => inputForm.seen.attr.visible = false);
+        inputForm.onMySpanHover.Add(() => inputForm.mySpan.attr.title = `You loaded this page on ${new Date().toLocaleString()}`);
+
+        inputForm.onShowClicked.Add(() => inputForm.seen.attr.visible = true);
+        inputForm.onHideClicked.Add(() => inputForm.seen.attr.visible = false);
 
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";
