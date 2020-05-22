@@ -82,15 +82,15 @@ export class IX {
                     container[k].attr = IXAttributeProxy.Create(k, container[k].attr);
                 }
 
-                if (container[k].title) {
-                    // mouse over title event
-                    el.addEventListener("mouseover", _ => el.setAttribute("title", container[k].title()));
-                }
+                //if (container[k].title) {
+                //    // mouse over title event
+                //    el.addEventListener("mouseover", _ => el.setAttribute("title", container[k].title()));
+                //}
 
                 switch (el.nodeName) {
                     case "INPUT":
                         // TODO: If this is a button type, then what?
-                        this.WireUpChangeHandler(el, container, "value", "change", "Changed");
+                        this.WireUpEventHandler(el, container, "value", "change", "Changed");
                         break;
                 }
             }
@@ -110,14 +110,18 @@ export class IX {
 
                     switch (el.nodeName) {
                         case "BUTTON":
-                            this.WireUpChangeHandler(el, container, null, "click", handlerName);
+                            this.WireUpEventHandler(el, container, null, "click", handlerName);
                             break;
 
                         case "INPUT":
                             // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
                             if (el.getAttribute("type") == "button") {
-                                this.WireUpChangeHandler(el, container, null, "click", handlerName);
+                                this.WireUpEventHandler(el, container, null, "click", handlerName);
                             }
+                            break;
+
+                        default:
+                            this.WireUpEventHandler(el, container, null, "mouseover", handlerName);
                             break;
                     }
                 }
@@ -125,7 +129,7 @@ export class IX {
         });
     }
 
-    private WireUpChangeHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
+    private WireUpEventHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
         el.addEventListener(eventName, ev => {
             let el = ev.srcElement as HTMLElement;
             let oldVal = undefined;

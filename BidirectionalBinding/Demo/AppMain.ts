@@ -35,12 +35,18 @@ class InputForm {
 
     onShow = new IXEvent();
     onHide = new IXEvent();
+    onMySpanHover = new IXEvent();
 
     public Add(): number {
         return this.x + this.y;
     }
 
-    mySpan = { title: () => `You loaded this page on ${new Date().toLocaleString()}` };
+    // mySpan = { title: () => `You loaded this page on ${new Date().toLocaleString()}` };
+
+    mySpan = {
+        attr: { title: "" }
+    };
+
     seen = {
         attr: { visible: true }
     };
@@ -80,6 +86,7 @@ export class AppMain {
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
 
+        inputForm.onMySpanHover.Add(() => () => inputForm.mySpan.attr.title = `You loaded this page on ${new Date().toLocaleString()}`);
         inputForm.onShow.Add(() => inputForm.seen.attr.visible = true);
         inputForm.onHide.Add(() => inputForm.seen.attr.visible = false);
 
