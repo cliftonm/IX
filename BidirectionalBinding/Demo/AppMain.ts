@@ -64,10 +64,9 @@ export class AppMain {
     }
 
     public run() {
-        let ix = new IX();
-        let inputForm = ix.CreateProxy(new InputForm());
+        let inputForm = IX.CreateProxy(new InputForm());
 
-        let form = new IX().CreateNullProxy();  // no associated view model.
+        let form = IX.CreateNullProxy();  // no associated view model.
         form.app = "Hello Interacx!";
 
         // Post wire-up
@@ -76,9 +75,9 @@ export class AppMain {
         inputForm.y = 2;
 
         // This does a post-wire-up of the change event handler for x and y now that they exist.
-        ix.UpdateProxy(inputForm);
+        IX.UpdateProxy(inputForm);
 
-        let outputForm = ix.CreateProxy(new OutputForm());
+        let outputForm = IX.CreateProxy(new OutputForm());
 
         inputForm.onFirstNameChanged.Add(newVal => outputForm.outFirstName = newVal);
         inputForm.onLastNameChanged.Add(newVal => outputForm.outLastName = newVal);

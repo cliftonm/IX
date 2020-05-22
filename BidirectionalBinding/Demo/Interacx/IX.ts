@@ -3,7 +3,7 @@ import { IXAttributeProxy } from "./IXAttributeProxy"
 import { IXEvent } from "./IXEvent"
 
 export class IX {
-    private uiHandler = {
+    private static uiHandler = {
         get: (obj, prop) => {
             console.log(`GET: ${prop}`);
             return obj[prop];
@@ -31,29 +31,29 @@ export class IX {
         }
     };
 
-    public CreateProxy<T>(container: T): T {
-        this.CreateArrayProxies(container);
-        this.CreatePropertyHandlers(container);
-        this.CreateButtonHandlers(container);
-        let target = new Proxy(container, this.uiHandler);
+    public static CreateProxy<T>(container: T): T {
+        IX.CreateArrayProxies(container);
+        IX.CreatePropertyHandlers(container);
+        IX.CreateButtonHandlers(container);
+        let target = new Proxy(container, IX.uiHandler);
 
         return target;
     }
 
-    public CreateNullProxy(): any {
-        let target = new Proxy({}, this.uiHandler);
+    public static CreateNullProxy(): any {
+        let target = new Proxy({}, IX.uiHandler);
 
         return target;
     }
 
     // For clarity that we're updating the proxy with container properties that now have values.
-    public UpdateProxy<T>(container: T): T {
-        this.CreateProxy(container);
+    public static UpdateProxy<T>(container: T): T {
+        IX.CreateProxy(container);
 
         return container;
     }
 
-    private CreateArrayProxies<T>(container: T): void {
+    private static CreateArrayProxies<T>(container: T): void {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
         // the proxy is operating on the array, not the container's property of the array.
         Object.keys(container).forEach(k => {
@@ -68,7 +68,7 @@ export class IX {
         });
     }
 
-    private CreatePropertyHandlers<T>(container: T) {
+    private static CreatePropertyHandlers<T>(container: T) {
         Object.keys(container).forEach(k => {
             let el = document.getElementById(k);
             let anonEl = el as any;
@@ -88,19 +88,19 @@ export class IX {
                 //    el.addEventListener("mouseover", _ => el.setAttribute("title", container[k].title()));
                 //}
 
-                let idName = this.UpperCaseFirstChar(el.id);
+                let idName = IX.UpperCaseFirstChar(el.id);
                 let changedEvent = `on${idName}Changed`;
                 let hoverEvent = `on${idName}Hover`;
 
                 if (container[hoverEvent]) {
-                    this.WireUpEventHandler(el, container, null, "mouseover", hoverEvent);
+                    IX.WireUpEventHandler(el, container, null, "mouseover", hoverEvent);
                 }
 
                 if (container[changedEvent]) {
                     switch (el.nodeName) {
                         case "INPUT":
                             // TODO: If this is a button type, then what?
-                            this.WireUpEventHandler(el, container, "value", "change", changedEvent);
+                            IX.WireUpEventHandler(el, container, "value", "change", changedEvent);
                             break;
                     }
                 }
@@ -108,10 +108,10 @@ export class IX {
         });
     }
 
-    private CreateButtonHandlers<T>(container: T) {
+    private static CreateButtonHandlers<T>(container: T) {
         Object.keys(container).forEach(k => {
             if (k.startsWith("on") && k.endsWith("Clicked")) {
-                let elName = this.LeftOf(this.LowerCaseFirstChar(k.substring(2)), "Clicked");
+                let elName = IX.LeftOf(IX.LowerCaseFirstChar(k.substring(2)), "Clicked");
                 let el = document.getElementById(elName);
                 let anonEl = el as any;
 
@@ -120,13 +120,13 @@ export class IX {
 
                     switch (el.nodeName) {
                         case "BUTTON":
-                            this.WireUpEventHandler(el, container, null, "click", k);
+                            IX.WireUpEventHandler(el, container, null, "click", k);
                             break;
 
                         case "INPUT":
                             // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
                             if (el.getAttribute("type") == "button") {
-                                this.WireUpEventHandler(el, container, null, "click", k);
+                                IX.WireUpEventHandler(el, container, null, "click", k);
                             }
                             break;
                     }
@@ -135,7 +135,7 @@ export class IX {
         });
     }
 
-    private WireUpEventHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
+    private static WireUpEventHandler<T>(el: HTMLElement, container: T, propertyName: string, eventName: string, handlerName: string) {
         el.addEventListener(eventName, ev => {
             let el = ev.srcElement as HTMLElement;
             let oldVal = undefined;
@@ -149,14 +149,14 @@ export class IX {
                 propName = el.id;
             }
 
-            let ucPropName = this.UpperCaseFirstChar(propName ?? "");
+            let ucPropName = IX.UpperCaseFirstChar(propName ?? "");
             // let eventName = `on${ucPropName}${handlerName}`;
             // let eventName = `on${handlerName}`;
             let handler = container[handlerName];
 
             if (handler) {
                 if (propertyName) {
-                    newVal = this.CustomConverter(container, ucPropName, newVal);
+                    newVal = IX.CustomConverter(container, ucPropName, newVal);
                     container[propName] = newVal;
                 }
 
@@ -165,19 +165,19 @@ export class IX {
         });
     }
 
-    private LeftOf(s: string, search: string): string {
+    private static LeftOf(s: string, search: string): string {
         return s.substring(0, s.indexOf(search));
     }
 
-    private LowerCaseFirstChar(s: string): string {
+    private static LowerCaseFirstChar(s: string): string {
         return s.charAt(0).toLowerCase() + s.slice(1);
     }
 
-    private UpperCaseFirstChar(s: string): string {
+    private static UpperCaseFirstChar(s: string): string {
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
-    private CustomConverter<T>(container: T, ucPropName: string, newVal: string): any {
+    private static CustomConverter<T>(container: T, ucPropName: string, newVal: string): any {
         let converter = `onConvert${ucPropName}`;
 
         if (container[converter]) {
