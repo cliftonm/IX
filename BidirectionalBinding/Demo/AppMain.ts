@@ -33,12 +33,7 @@ class InputForm {
     onConvertX = x => Number(x);
     onConvertY = y => Number(y);
 
-    public Add(): number {
-        return this.x + this.y;
-    }
-
-    // mySpan = { title: () => `You loaded this page on ${new Date().toLocaleString()}` };
-
+    Add = () => this.x + this.y;
 }
 
 class HoverExample {
@@ -90,6 +85,12 @@ export class AppMain {
         let form = IX.CreateNullProxy();  // No associated view model.
         form.app = "Hello Interacx!";
 
+        // Post wire-up
+        // Notice UI elements get set immediately.
+        // TODO: Fire any onConvert and onChanged events!
+        inputForm.x = 1;
+        inputForm.y = 2;
+
         // This does a post-wire-up of the change event handler for x and y now that they exist.
         IX.UpdateProxy(inputForm);
 
@@ -100,12 +101,6 @@ export class AppMain {
 
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
         inputForm.onYChanged.Add(() => outputForm.sum = inputForm.Add());
-
-        // Post wire-up
-        // Notice UI elements get set immediately.
-        // TODO: Fire any onConvert and onChanged events!
-        inputForm.x = 1;
-        inputForm.y = 2;
 
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";
