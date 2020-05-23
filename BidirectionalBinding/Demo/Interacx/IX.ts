@@ -1,5 +1,6 @@
 ﻿import { IXArrayProxy } from "./IXArrayProxy"
 import { IXAttributeProxy } from "./IXAttributeProxy"
+import { IXIBind } from "./IXBinder"
 import { IXEvent } from "./IXEvent"
 
 export class IX {
@@ -37,20 +38,8 @@ export class IX {
         IX.CreateArrayProxies(container, proxy);
         IX.CreatePropertyHandlers(container, proxy);
         IX.CreateButtonHandlers(container, proxy);
-
-        Object.keys(container).forEach(k => {
-            let name = container[k].constructor?.name;
-
-            switch (name) {
-                case "String":
-                case "Number":
-                case "Boolean":
-                case "BigInt":
-                    // case Array???
-                    proxy[k] = container[k];        // Force the proxy to handle the initial value.
-                    break;
-            }
-        });
+        IX.CreateBinders(container, proxy);
+        IX.Initialize(container, proxy);
 
         return proxy;
     }
@@ -68,6 +57,24 @@ export class IX {
         return container;
     }
 
+    private static Initialize<T>(container: T, proxy: T): void {
+        Object.keys(container).forEach(k => {
+            let name = container[k].constructor?.name;
+
+            switch (name) {
+                case "String":
+                case "Number":
+                case "Boolean":
+                case "BigInt":
+                    // case Array???
+                    proxy[k] = container[k];        // Force the proxy to handle the initial value.
+                    break;
+            }
+        });
+    }
+
+    public static nameof = <T>(name: Extract<keyof T, string>): string => name;
+
     private static CreateArrayProxies<T>(container: T, proxy: T): void {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
         // the proxy is operating on the array, not the container's property of the array.
@@ -79,6 +86,26 @@ export class IX {
                 if (container[k]._id != k) {
                     container[k] = IXArrayProxy.Create(k, container);
                 }
+            }
+        });
+    }
+
+    private static CreateBinders<T>(container: T, proxy: T): void {
+        Object.keys(container).forEach(k => {
+
+            if (container[k].binders?.length ?? 0 > 0) {
+                let binders = container[k].binders as IXIBind[];
+
+                binders.forEach(b => {
+                    let elName = Object.keys(b)[0];
+                    let el = document.getElementById(elName);
+                    console.log(`Binding receiver ${k} to sender ${elName}`);
+                    el.addEventListener("keyup", ev => {
+                        let v = (ev.currentTarget as HTMLInputElement).value;
+                        proxy[elName] = v;
+                        proxy[k] = v;
+                    });
+                })
             }
         });
     }
@@ -104,8 +131,12 @@ export class IX {
                 //}
 
                 let idName = IX.UpperCaseFirstChar(el.id);
+
+                
+                // TODO: create a dictionary to handle this.
                 let changedEvent = `on${idName}Changed`;
                 let hoverEvent = `on${idName}Hover`;
+                let keyUpEvent = `on${idName}KeyUp`;
 
                 if (container[hoverEvent]) {
                     IX.WireUpEventHandler(el, container, proxy, null, "mouseover", hoverEvent);
@@ -116,6 +147,15 @@ export class IX {
                         case "INPUT":
                             // TODO: If this is a button type, then what?
                             IX.WireUpEventHandler(el, container, proxy, "value", "change", changedEvent);
+                            break;
+                    }
+                }
+
+                if (container[keyUpEvent]) {
+                    switch (el.nodeName) {
+                        case "INPUT":
+                            // TODO: If this is a button type, then what?
+                            IX.WireUpEventHandler(el, container, proxy, "value", "keyup", keyUpEvent);
                             break;
                     }
                 }

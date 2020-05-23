@@ -101,7 +101,9 @@ var app3 = new Vue({
   }
 })</pre>
 <h3>The IX Way</h3>
-<p>Note the addition of two buttons to toggle the visibility of the <code>SPAN</code>:</p>
+<p>In IX, conditional behaviors are implemented through the event mechanism, 
+usually to manipulate element attributes.&nbsp; Diverging slightly from the Vue 
+example above, note the addition of two buttons to toggle the visibility of the <code>SPAN</code>:</p>
 <pre>&lt;span id=&quot;seen&quot;&gt;Now you see me...&lt;/span&gt;
  &lt;!-- Two ways to declare a button --&gt;
 &lt;button id=&quot;show&quot;&gt;Show&lt;/button&gt;
@@ -126,6 +128,28 @@ IX.CreateProxy(new VisibilityExample());</pre>
 	<li>Intellisense works perfectly in Visual Studio.</li>
 	<li>No &quot;string&quot; element name.</li>
 </ol>
+<h2>Loops - TODO</h2>
+<h3>The Vue Way</h3>
+<pre>&lt;div id=&quot;app-4&quot;&gt;
+  &lt;ol&gt;
+    &lt;li v-for=&quot;todo in todos&quot;&gt;
+      {{ todo.text }}
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
+
+var app4 = new Vue({
+  el: '#app-4',
+  data: {
+    todos: [
+      { text: 'Learn JavaScript' },
+      { text: 'Learn Vue' },
+      { text: 'Build something awesome' }
+    ]
+  }
+})</pre>
+<h3>The IX Way</h3>
+<p>&nbsp;</p>
 <h2>Button Clicks</h2>
 <h3>The Vue Way</h3>
 <pre>&lt;div id=&quot;app-5&quot;&gt;
@@ -157,6 +181,13 @@ class ReverseExample {
 }
 
 IX.CreateProxy(new ReverseExample());</pre>
+<p>Again, notice:</p>
+<ol>
+	<li>No {{ }} syntax required.</li>
+<li>No &quot;#id&quot; string to identify the element ID.</li>
+	<li>The event mechanism, being multicast, allows us to wire up more than one 
+	event (not illustrated, but that's point of using events.)</li>
+</ol>
 <p><img border="0" src="r1.png" width="170" height="54"></p>
 <p>After clicking on the button:</p>
 <p><img border="0" src="r2.png" width="161" height="52"></p>
@@ -197,10 +228,52 @@ inputForm.onYChanged.Add(() =&gt; outputForm.sum = inputForm.Add());</pre>
 <p>Behind the scenes, the input box text is converted to a <code>Number</code> with the 
 <code>onConvertX</code> and <code>onConvertY</code> converters, and the rest is handled by the standard 
 data binding of the properties for setting <code>sum</code> to the values of </code>x</code> and </code>y</code>.</p>
-<p>Notice how you can create classes as containers to sections of the HTML.&nbsp; 
+<p>Also, notice how you can create classes as containers to sections of the HTML.&nbsp; 
 We could easily have put <code>sum</code> in the <code>InputForm</code>, but instead I wanted to 
 illustrate how to use a separate container object, <code>OutputForm</code>, as a way of 
 compartmentalizing the properties into separate containers.</p>
+<h2>Two Way Binding</h2>
+<p>We've already seen in the examples above binding between the view and the 
+model.&nbsp; One of Vue's examples is direct update of one element based on the 
+realtime update of an input element.&nbsp; While I can't think of a real-life 
+example where one would need this, real-time updating, say of a filter criteria, 
+is definitely useful, so we'll start with the Vue example:</p>
+<h3>The Vue Way</h3>
+<pre>&lt;div id=&quot;app-6&quot;&gt;
+  &lt;p&gt;{{ message }}&lt;/p&gt;
+    &lt;input v-model=&quot;message&quot;&gt;
+  &lt;/div&gt;
+
+var app6 = new Vue({
+  el: '#app-6',
+  data: {
+    message: 'Hello Vue!'
+  }
+})</pre>
+<h3>The IX Way</h3>
+<p>This is already easily accomplished with events:</p>
+<pre>First Name:
+&lt;p id=&quot;message2&quot;&gt;/p&gt;
+&lt;input id=&quot;input2&quot;/&gt;
+
+class BidirectionalExample {
+  message2: string = &quot;&quot;;
+  input2: string = &quot;&quot;;
+
+  onInput2KeyUp = new IXEvent().Add((v, p: BidirectionalExample) =&gt; p.message2 = v);
+}
+
+IX.CreateProxy(new BidirectionalExample());</pre>
+<p><img border="0" src="keyUp.png" width="171" height="48"></p>
+<p>However, to make this more &quot;Vue-ish&quot;, we can do:</p>
+<pre>class BidirectionalExample {
+  message2 = new IXBinder({ input2: null });
+  input2: string = &quot;&quot;;</pre>
+<p>Here we are specifying the &quot;from&quot; element as the key and any &quot;value&quot; of the 
+key.&nbsp; What displeases me about this is that the key cannot be implemented a 
+way that leverages Intellisense and type checking.&nbsp; The best we can do is 
+runtime checking that the &quot;from&quot; binder element exists.&nbsp; So at this point, 
+specifying the &quot;bind from&quot; property as a string almost makes sense.</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>

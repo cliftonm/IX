@@ -90,6 +90,7 @@
     <TypeScriptCompile Include="AppMain.ts" />
     <TypeScriptCompile Include="Interacx\IXArrayProxy.ts" />
     <TypeScriptCompile Include="Interacx\IXAttributeProxy.ts" />
+    <TypeScriptCompile Include="Interacx\IXBinder.ts" />
     <TypeScriptCompile Include="Interacx\IXEvent.ts" />
     <TypeScriptCompile Include="Interacx\IX.ts" />
     <TypeScriptCompile Include="Interacx\IXSubscriber.ts" />

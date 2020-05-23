@@ -9,8 +9,9 @@
 }
 */
 
-import { IXEvent } from "./Interacx/IXEvent"
 import { IX } from "Interacx/IX"
+import { IXBinder } from "./Interacx/IXBinder"
+import { IXEvent } from "./Interacx/IXEvent"
 
 class InputForm {
     firstName: string = "";
@@ -24,7 +25,7 @@ class InputForm {
     list: string[] = [];
 
     // Event handlers:
-    onFirstNameChanged = new IXEvent();
+    onFirstNameKeyUp = new IXEvent();
     onLastNameChanged = new IXEvent();
     onXChanged = new IXEvent();
     onYChanged = new IXEvent();
@@ -58,6 +59,13 @@ class ReverseExample {
     onReverseMessageClicked = new IXEvent().Add((_, p: ReverseExample) => p.message = p.message.split('').reverse().join(''));
 }
 
+class BidirectionalExample {
+    message2 = new IXBinder({ input2: null });
+    input2: string = "";
+
+    // onInput2KeyUp = new IXEvent().Add((v, p: BidirectionalExample) => p.message2 = v);
+}
+
 class OutputForm {
     outFirstName: string;
     outLastName: string;
@@ -70,6 +78,7 @@ export class AppMain {
     }
 
     public run() {
+        IX.CreateProxy(new BidirectionalExample());
         IX.CreateProxy(new ReverseExample());
 
         let hform = IX.CreateProxy(new HoverExample());
@@ -96,7 +105,7 @@ export class AppMain {
 
         let outputForm = IX.CreateProxy(new OutputForm());
 
-        inputForm.onFirstNameChanged.Add(newVal => outputForm.outFirstName = newVal);
+        inputForm.onFirstNameKeyUp.Add(newVal => outputForm.outFirstName = newVal);
         inputForm.onLastNameChanged.Add(newVal => outputForm.outLastName = newVal);
 
         inputForm.onXChanged.Add(() => outputForm.sum = inputForm.Add());
