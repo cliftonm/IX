@@ -1,0 +1,217 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>TypeScript</title>
+</head>
+
+<body>
+
+<p>TypeScript: Two Way Data Binding, Events, And More</p>
+<p>Better than Vue?</p>
+<h2>Introduction</h2>
+<p>The impetus for this proof of concept is that I really despise string 
+literals for ID's, which it seems that just about every one of those third party 
+frameworks still is stuck on, and of course, native DOM manipulation is as well.&nbsp; 
+I also wanted to create a lightweight framework for providing two-way data 
+binding, events, attribute handling, and so forth.</p>
+<p>Thus &quot;IX&quot; is born, which is short for &quot;Interacx&quot;, which is a WinForm suite of 
+tools that I created a long time ago to automate data manipulation without using 
+an ORM.&nbsp; I decided to hijack the name since WinForm applications are, well, 
+passé.</p>
+
+<p>And for giggles, I'm going to compare how you use this framework against Vue 
+examples from the Vue website.</p>
+<h2>Simple Data Binding of Inner HTML</h2>
+<p>Let's start with simple data binding of the inner HTML associated with a <code>DIV</code>.</p>
+<h3>The Vue Way</h3>
+<pre>&lt;div id=&quot;app&quot;&gt;
+  {{ message }}
+&lt;/div&gt;
+
+var app = new Vue({
+  el: '#app',
+  data: {
+   message: 'Hello Vue!'
+  }
+})</pre>
+<p>What I don't like:</p>
+<ol>
+	<li>The <code>{{ }}</code> usage.</li>
+	<li>The <code>#app</code>.</li>
+	<li>The whole <code>data</code> object thing.</li>
+</ol>
+<h3>The IX Way</h3>
+<pre>&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+
+let form = IX.CreateNullProxy(); // No associated view model.
+form.app = &quot;Hello Interacx!&quot;;</pre>
+<p><img border="0" src="helloIX.png" width="114" height="26"></p>
+<p>That's it.</p>
+<h2>Reactive Behavior</h2>
+<p>The next example is displaying some realtime computed value as part of a SPAN 
+title.</p>
+<h3>The Vue Way</h3>
+<pre>&lt;div id=&quot;app-2&quot;&gt;
+  &lt;span v-bind:title=&quot;message&quot;&gt;
+    Hover your mouse over me for a few seconds
+    to see my dynamically bound title!
+  &lt;/span&gt;
+&lt;/div&gt;
+
+var app2 = new Vue({
+  el: '#app-2',
+  data: {
+    message: 'You loaded this page on ' + new Date().toLocaleString()
+  }
+})</pre>
+<h3>The IX Way</h3>
+<pre>&lt;span id=&quot;mySpan&quot;&gt;However your mouse over me for a few seconds to see the dynamically bound title!&lt;/span&gt;
+
+class HoverExample {
+  mySpan = {
+    attr: { title: &quot;&quot; }
+  };
+
+  onMySpanHover = new IXEvent();
+}
+
+let form = IX.CreateProxy(new HoverExample());
+form
+  .onMySpanHover
+  .Add(() =&gt; 
+    hform.mySpan.attr.title = `You loaded this page on ${new Date().toLocaleString()}`);</pre>
+<p>More verbose but the benefit is that you're using a repeatable pattern of 
+using a multicast event handler.&nbsp; I did have an implementation where I 
+could just set the title as a function, but I didn't like the one-off 
+implementation behind the scenes that this required.</p>
+<h2>Conditionals</h2>
+<p>I also really don't like to make a mess of the markup with declarative code 
+elements.</p>
+<h3>The Vue Way</h3>
+<pre>&lt;div id=&quot;app-3&quot;&gt;
+  &lt;span v-if=&quot;seen&quot;&gt;Now you see me&lt;/span&gt;
+&lt;/div&gt;
+
+var app3 = new Vue({
+  el: '#app-3',
+  data: {
+    seen: true
+  }
+})</pre>
+<h3>The IX Way</h3>
+<p>Note the addition of two buttons to toggle the visibility of the <code>SPAN</code>:</p>
+<pre>&lt;span id=&quot;seen&quot;&gt;Now you see me...&lt;/span&gt;
+ &lt;!-- Two ways to declare a button --&gt;
+&lt;button id=&quot;show&quot;&gt;Show&lt;/button&gt;
+&lt;input id=&quot;hide&quot; type=&quot;button&quot; value=&quot;Hide&quot; /&gt;
+
+
+class VisibilityExample {
+  seen = {
+    attr: { visible: true }
+  };
+
+
+  onShowClicked = new IXEvent().Add((_, p) =&gt; p.seen.attr.visible = true);
+  onHideClicked = new IXEvent().Add((_, p) =&gt; p.seen.attr.visible = false);
+}
+
+IX.CreateProxy(new VisibilityExample());</pre>
+<p>These are wired up to two buttons, hence the event handlers.</p>
+<p>Here:</p>
+<ol>
+	<li>We have a consistent way of manipulating element attributes.</li>
+	<li>Intellisense works perfectly in Visual Studio.</li>
+	<li>No &quot;string&quot; element name.</li>
+</ol>
+<h2>Button Clicks</h2>
+<h3>The Vue Way</h3>
+<pre>&lt;div id=&quot;app-5&quot;&gt;
+  &lt;p&gt;{{ message }}&lt;/p&gt;
+  &lt;button v-on:click=&quot;reverseMessage&quot;&gt;Reverse Message&lt;/button&gt;
+&lt;/div&gt;
+
+var app5 = new Vue({
+  el: '#app-5',
+  data: {
+  message: 'Hello Vue.js!'
+  },
+  methods: {
+    reverseMessage: function () {
+      this.message = this.message.split('').reverse().join('')
+    }
+  }
+})</pre>
+<h3>The IX Way</h3>
+<pre>&lt;div&gt;
+  &lt;p id=&quot;message&quot;&gt;&lt;/p&gt;
+  &lt;button id=&quot;reverseMessage&quot;&gt;Reverse Message&lt;/button&gt;
+&lt;/div&gt;
+
+class ReverseExample {
+  message = &quot;Hello From Interacx!&quot;;
+  onReverseMessageClicked = new IXEvent()
+    .Add((_, p: ReverseExample) =&gt; p.message = p.message.split('').reverse().join(''));
+}
+
+IX.CreateProxy(new ReverseExample());</pre>
+<p><img border="0" src="r1.png" width="170" height="54"></p>
+<p>After clicking on the button:</p>
+<p><img border="0" src="r2.png" width="161" height="52"></p>
+<h2>Data Conversion</h2>
+<p>Consider this UI:</p>
+<p><img border="0" src="convert.png" width="548" height="52"></p>
+<p>And the markup (CSS and extraneous DIV's removed for readability):</p>
+<pre>X:
+&lt;input id=&quot;x&quot; class=&quot;fieldInputSmall&quot; /&gt;
+Y:
+&lt;input id=&quot;y&quot; class=&quot;fieldInputSmall&quot; /&gt;</pre>
+<p>Here, we do not want the strings &quot;1&quot; and &quot;2&quot; to sum to &quot;12&quot;, so we implement 
+converters:</p>
+<pre>class InputForm {
+  x: number;
+  y: number;
+
+  onXChanged = new IXEvent();
+  onYChanged = new IXEvent();
+
+  // Converters, so 1 + 2 != '12'
+  onConvertX = x =&gt; Number(x);
+  onConvertY = y =&gt; Number(y);
+
+  Add = () =&gt; this.x + this.y;
+}
+
+class OutputForm {
+  sum: number;
+}
+</pre>
+<p>And the events are wired up like this:</p>
+<pre>let inputForm = IX.CreateProxy(new InputForm());
+let outputForm = IX.CreateProxy(new OutputForm());
+
+inputForm.onXChanged.Add(() =&gt; outputForm.sum = inputForm.Add());
+inputForm.onYChanged.Add(() =&gt; outputForm.sum = inputForm.Add());</pre>
+<p>Behind the scenes, the input box text is converted to a <code>Number</code> with the 
+<code>onConvertX</code> and <code>onConvertY</code> converters, and the rest is handled by the standard 
+data binding of the properties for setting <code>sum</code> to the values of </code>x</code> and </code>y</code>.</p>
+<p>Notice how you can create classes as containers to sections of the HTML.&nbsp; 
+We could easily have put <code>sum</code> in the <code>InputForm</code>, but instead I wanted to 
+illustrate how to use a separate container object, <code>OutputForm</code>, as a way of 
+compartmentalizing the properties into separate containers.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h2>Implementation Patterns</h2>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>
