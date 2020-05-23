@@ -128,7 +128,7 @@ IX.CreateProxy(new VisibilityExample());</pre>
 	<li>Intellisense works perfectly in Visual Studio.</li>
 	<li>No &quot;string&quot; element name.</li>
 </ol>
-<h2>Loops - TODO</h2>
+<h2>Loops</h2>
 <h3>The Vue Way</h3>
 <pre>&lt;div id=&quot;app-4&quot;&gt;
   &lt;ol&gt;
@@ -273,10 +273,74 @@ IX.CreateProxy(new BidirectionalExample());</pre>
 key.&nbsp; What displeases me about this is that the key cannot be implemented a 
 way that leverages Intellisense and type checking.&nbsp; The best we can do is 
 runtime checking that the &quot;from&quot; binder element exists.&nbsp; So at this point, 
-specifying the &quot;bind from&quot; property as a string almost makes sense.</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
+specifying the &quot;bind from&quot; property as a string almost makes sense.&nbsp; 
+Instead, I opted for this implementation:</p>
+<pre>class BidirectionalExample {
+  input2: string = &quot;&quot;;
+  message2 = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.input2) });
+  onInput2KeyUp = new IXEvent().Add((v, p: BidirectionalExample) =&gt; p.message2 = v);
+}</pre>
+<p>Which is somewhat lame as well but has the advantage of supporting 
+Intellisense, albeit the property your binding to must already be declared 
+previously.&nbsp; Behind the scenes, we have a very simple implementation to 
+extract the name, by converting the function into a string:</p>
+<pre>public static nameof&lt;TResult&gt;(name: () =&gt; TResult): string {
+  let ret = IX.RightOf(name.toString(), &quot;.&quot;);
+
+  return ret;
+}</pre>
+<p>Sadly that's seems to be the best we can do with Javascript unless you want 
+to use something like <a href="https://github.com/dsherret/ts-nameof">ts-nameof</a>, 
+which I do not because ts-nameof is a compile-time transformation, and I do not 
+want the developer that uses this library to have to go through hoops to get 
+this to work.</p>
+<p>We can also bind the same source to different targets:</p>
+<pre>&lt;p&gt;
+  &lt;label id=&quot;message2&quot;&gt;&lt;/label&gt;
+  &lt;label id=&quot;message3&quot;&gt;&lt;/label&gt;
+&lt;/p&gt;
+&lt;input id=&quot;input2&quot; /&gt;
+
+class BidirectionalExample {
+  input2: string = &quot;&quot;;
+  message2 = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.input2) });
+  message3 = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.input2) });
+}</pre>
+<p>As well as different sources to the same target:</p>
+<pre>&lt;p&gt;
+  &lt;label id=&quot;message2&quot;&gt;&lt;/label&gt;
+  &lt;label id=&quot;message3&quot;&gt;&lt;/label&gt;
+&lt;/p&gt;
+&lt;input id=&quot;input2&quot; /&gt;
+&lt;input id=&quot;input3&quot; /&gt;
+
+class BidirectionalExample {
+  input2: string = &quot;&quot;;
+  input3: string = &quot;&quot;;
+  message2 = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.input2) });
+  message3 = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.input2) })
+               .Add({ bindFrom: IX.nameof(() =&gt; this.input3) });
+}</pre>
+<p>Here, typing in the left edit box sets messages 2 &amp; 3:</p>
+<p><img border="0" src="src1.png" width="326" height="51"></p>
+<p>Typing in the right edit box sets message 3:</p>
+<p><img border="0" src="src2.png" width="324" height="51"></p>
+<p>But as I said earlier, doing this kind of binding really doesn't make much 
+sense.&nbsp; Typically, a transformation does something &quot;useful&quot;, so we have 
+this contrived example:</p>
+<pre>class BidirectionalExample {
+  input2: string = &quot;&quot;;
+  input3: string = &quot;&quot;;
+  message2 = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.input2) });
+  message3 = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.input2) }).Add({
+    bindFrom: IX.nameof(() =&gt; this.input3), 
+    op: v =&gt; v.split('').reverse().join('') 
+  });
+
+// onInput2KeyUp = new IXEvent().Add((v, p: BidirectionalExample) =&gt; p.message2 = v);
+}</pre>
+<p>and thus we get:</p>
+<p><img border="0" src="op1.png" width="313" height="49"></p>
 <h2>Implementation Patterns</h2>
 <h2>Behind the Scenes</h2>
 <h3>TypeScript Does Not Mean Runtime Types</h3>

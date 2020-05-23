@@ -1,15 +1,16 @@
-﻿export interface IXIBind {
-    [key: string]: any;
+﻿export interface IXBind {
+    bindFrom: string;
+    op?: (v: string) => string;
 }
 
 export class IXBinder {
-    public binders: IXIBind[] = [];
+    public binders: IXBind[] = [];
 
-    constructor(binder: IXIBind) {
+    constructor(binder: IXBind) {
         this.binders.push(binder);
     }
 
-    public Add(binder: IXIBind): IXBinder {
+    public Add(binder: IXBind): IXBinder {
         this.binders.push(binder);
 
         return this;

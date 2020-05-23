@@ -1,6 +1,6 @@
 ﻿import { IXArrayProxy } from "./IXArrayProxy"
 import { IXAttributeProxy } from "./IXAttributeProxy"
-import { IXIBind } from "./IXBinder"
+import { IXBind } from "./IXBinder"
 import { IXEvent } from "./IXEvent"
 
 export class IX {
@@ -18,6 +18,7 @@ export class IX {
             switch (el.nodeName) {
                 case "DIV":
                 case "P":
+                case "LABEL":
                     (el as HTMLElement).innerHTML = val;
                     break;
 
@@ -73,7 +74,11 @@ export class IX {
         });
     }
 
-    public static nameof = <T>(name: Extract<keyof T, string>): string => name;
+    public static nameof<TResult>(name: () => TResult): string {
+        let ret = IX.RightOf(name.toString(), ".");
+
+        return ret;
+    }
 
     private static CreateArrayProxies<T>(container: T, proxy: T): void {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
@@ -94,15 +99,18 @@ export class IX {
         Object.keys(container).forEach(k => {
 
             if (container[k].binders?.length ?? 0 > 0) {
-                let binders = container[k].binders as IXIBind[];
+                let binders = container[k].binders as IXBind[];
 
                 binders.forEach(b => {
-                    let elName = Object.keys(b)[0];
+                    let elName = b.bindFrom;
                     let el = document.getElementById(elName);
                     console.log(`Binding receiver ${k} to sender ${elName}`);
                     el.addEventListener("keyup", ev => {
                         let v = (ev.currentTarget as HTMLInputElement).value;
                         proxy[elName] = v;
+
+                        v = b.op === undefined ? v : b.op(v);
+
                         proxy[k] = v;
                     });
                 })
@@ -205,8 +213,6 @@ export class IX {
             }
 
             let ucPropName = IX.UpperCaseFirstChar(propName ?? "");
-            // let eventName = `on${ucPropName}${handlerName}`;
-            // let eventName = `on${handlerName}`;
             let handler = container[handlerName];
 
             if (handler) {
@@ -222,6 +228,10 @@ export class IX {
 
     private static LeftOf(s: string, search: string): string {
         return s.substring(0, s.indexOf(search));
+    }
+
+    private static RightOf(s: string, search: string): string {
+        return s.substring(s.indexOf(search) + 1);
     }
 
     private static LowerCaseFirstChar(s: string): string {
