@@ -8,9 +8,15 @@
 
 <body>
 
-<p>TypeScript: Two Way Data Binding, Events, And More</p>
-<p>Better than Vue?</p>
+<p>TypeScript: Model - Element Binding, Two Way Data Binding, Events, And More</p>
+<p>Part I: Better than Vue?</p>
 <h2>Introduction</h2>
+<p>I'm being somewhat flippant when I say &quot;better than Vue&quot; - this article 
+covers only the basics, and incomplete at that, but I have found it a useful 
+exploration of how to leverage the Proxy type to bind class properties to 
+models, achieve two way binding, subscribe to UI events, and so forth, all using 
+actual &quot;edit-time&quot; types for type safety and Intellisense support - as in, no 
+strings referencing DOM elements by their ID's.</p>
 <p>The impetus for this proof of concept is that I really despise string 
 literals for ID's, which it seems that just about every one of those third party 
 frameworks still is stuck on, and of course, native DOM manipulation is as well.&nbsp; 
@@ -21,7 +27,7 @@ tools that I created a long time ago to automate data manipulation without using
 an ORM.&nbsp; I decided to hijack the name since WinForm applications are, well, 
 passé.</p>
 
-<p>And for giggles, I'm going to compare how you use this framework against Vue 
+<p>So going back to my remark about being flippant, I'm going to compare how you use this framework against Vue 
 examples from the Vue website.</p>
 <h2>Simple Data Binding of Inner HTML</h2>
 <p>Let's start with simple data binding of the inner HTML associated with a <code>DIV</code>.</p>
@@ -149,6 +155,32 @@ var app4 = new Vue({
   }
 })</pre>
 <h3>The IX Way</h3>
+<pre>&lt;ol id=&quot;someList&quot;&gt;&lt;/ol&gt;
+
+class ListExample {
+  someList: string[] = [&quot;Learn Javascript&quot;, &quot;Learn IX&quot;, &quot;Wear a mask!&quot;];
+}
+
+IX.CreateProxy(new ListExample());</pre>
+<p>Result:</p>
+<p><img border="0" src="loop1.png" width="152" height="91"></p>
+<p>Given that most lists come from a data source rather being hard coded:</p>
+<pre>&lt;ol id=&quot;someList&quot;&gt;&lt;/ol&gt;
+
+class ListExample {
+  someList: string[] = [];
+}
+
+let listForm = IX.CreateProxy(new ListExample());
+
+listForm.someList.push(&quot;Learn Javascript&quot;);
+listForm.someList.push(&quot;Learn IX&quot;);
+listForm.someList.push(&quot;Wear a mask!&quot;);</pre>
+<p>Or:</p>
+<pre>let listForm = IX.CreateProxy(new ListExample());
+let items = [&quot;Learn Javascript&quot;, &quot;Learn IX&quot;, &quot;Wear a mask!&quot;];
+listForm.someList = items;</pre>
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 <h2>Button Clicks</h2>
 <h3>The Vue Way</h3>

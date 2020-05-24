@@ -22,7 +22,7 @@ class InputForm {
     y: number;
 
     // arrays must be initialized.
-    list: string[] = [];
+    // list: string[] = [];
 
     // Event handlers:
     onFirstNameKeyUp = new IXEvent();
@@ -69,6 +69,10 @@ class BidirectionalExample {
     // onInput2KeyUp = new IXEvent().Add((v, p: BidirectionalExample) => p.message2 = v);
 }
 
+class ListExample {
+    someList: string[] = ["Learn Javascript", "Learn IX", "Wear a mask!"];
+}
+
 class OutputForm {
     outFirstName: string;
     outLastName: string;
@@ -81,6 +85,11 @@ export class AppMain {
     }
 
     public run() {
+        IX.CreateProxy(new ListExample());
+        // let listForm = IX.CreateProxy(new ListExample());
+        // let items = ["Learn Javascript", "Learn IX", "Wear a mask!"];
+        // listForm.someList = items;
+
         IX.CreateProxy(new BidirectionalExample());
         IX.CreateProxy(new ReverseExample());
 
@@ -117,9 +126,9 @@ export class AppMain {
         inputForm.firstName = "Marc";
         inputForm.lastName = "Clifton";
 
-        inputForm.list.push("abc");
-        inputForm.list.push("def");
-        inputForm.list[1] = "DEF";
-        inputForm.list.pop();
+        //inputForm.list.push("abc");
+        //inputForm.list.push("def");
+        //inputForm.list[1] = "DEF";
+        //inputForm.list.pop();
     }
 }

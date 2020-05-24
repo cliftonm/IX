@@ -11,9 +11,13 @@ export class IX {
         },
 
         set: (obj, prop, val) => {
-            console.log(`SET: ${prop} to ${val}`);
+            console.log(`SET: ${prop} to ${val.toString()}`);
 
             let el = document.getElementById(prop);
+
+            if (!el) {
+                console.log(`${prop} not found!.`);
+            }
 
             switch (el.nodeName) {
                 case "DIV":
@@ -24,6 +28,13 @@ export class IX {
 
                 case "INPUT":
                     (el as HTMLInputElement).value = val;
+                    break;
+
+                case "OL":
+                    // We expect an array.
+                    if (val.constructor?.name == "Array") {
+                        (val as []).forEach(v => obj[prop].push(v));
+                    }
                     break;
             }
 
@@ -67,7 +78,7 @@ export class IX {
                 case "Number":
                 case "Boolean":
                 case "BigInt":
-                    // case Array???
+                case "Array":
                     proxy[k] = container[k];        // Force the proxy to handle the initial value.
                     break;
             }
@@ -108,9 +119,7 @@ export class IX {
                     el.addEventListener("keyup", ev => {
                         let v = (ev.currentTarget as HTMLInputElement).value;
                         proxy[elName] = v;
-
                         v = b.op === undefined ? v : b.op(v);
-
                         proxy[k] = v;
                     });
                 })
