@@ -32,9 +32,21 @@
 
                 switch (el.nodeName) {
                     case "OL":
-                        let li = document.createElement("li") as HTMLLIElement;
-                        li.innerText = val;
-                        (el as HTMLOListElement).append(li);
+                        let n = Number(prop);
+/*
+                        if (n < obj.length) {
+                            // Replace the existing LI element.
+                            let li = document.createElement("li") as HTMLLIElement;
+                            li.innerText = val;
+                            let ol = el as HTMLOListElement;
+                            // ol.childNodes[n] = li;
+                        } else {
+*/
+                        {
+                            let li = document.createElement("li") as HTMLLIElement;
+                            li.innerText = val;
+                            (el as HTMLOListElement).append(li);
+                        }
                         break;
                 }
             }

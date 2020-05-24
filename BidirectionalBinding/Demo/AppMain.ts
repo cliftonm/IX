@@ -70,7 +70,7 @@ class BidirectionalExample {
 }
 
 class ListExample {
-    someList: string[] = ["Learn Javascript", "Learn IX", "Wear a mask!"];
+    someList: string[] = ["Learn Javascript", "Fizbin", "Wear a mask!"];
 }
 
 class OutputForm {
@@ -85,7 +85,8 @@ export class AppMain {
     }
 
     public run() {
-        IX.CreateProxy(new ListExample());
+        let listForm = IX.CreateProxy(new ListExample());
+        // listForm.someList[1] = "Learn IX!";
         // let listForm = IX.CreateProxy(new ListExample());
         // let items = ["Learn Javascript", "Learn IX", "Wear a mask!"];
         // listForm.someList = items;

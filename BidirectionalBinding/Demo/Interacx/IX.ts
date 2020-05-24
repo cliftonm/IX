@@ -33,6 +33,7 @@ export class IX {
                 case "OL":
                     // We expect an array.
                     if (val.constructor?.name == "Array") {
+                        // obj[prop] = [];     // Clear the current array, as we're recreating it with the val array.
                         (val as []).forEach(v => obj[prop].push(v));
                     }
                     break;
@@ -78,8 +79,15 @@ export class IX {
                 case "Number":
                 case "Boolean":
                 case "BigInt":
-                case "Array":
                     proxy[k] = container[k];        // Force the proxy to handle the initial value.
+                    break;
+
+                case "Array":
+                    // Special handling of arrays that have an initial set of elements so we don't duplicate the elements.
+                    // At this point, container[k] IS the proxy (IXArrayProxy) so we have the issue that the proxy is set to 
+                    // the array but the UI elements haven't been created.  If we just do: 
+                    // proxy[k] = container[k];   
+                    // This will initialize the UI list but push duplicates of the into the array.
                     break;
             }
         });
