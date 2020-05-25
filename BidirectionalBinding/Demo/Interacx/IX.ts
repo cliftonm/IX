@@ -1,5 +1,6 @@
 ﻿import { IXArrayProxy } from "./IXArrayProxy"
 import { IXAttributeProxy } from "./IXAttributeProxy"
+import { IXClassListProxy } from "./IXClassListProxy"
 import { IXBind } from "./IXBinder"
 import { IXEvent } from "./IXEvent"
 
@@ -48,7 +49,7 @@ export class IX {
 
     public static CreateProxy<T>(container: T): T {
         let proxy = new Proxy(container, IX.uiHandler);
-        IX.CreateArrayProxies(container, proxy);
+        // IX.CreateArrayProxies(container, proxy);
         IX.CreatePropertyHandlers(container, proxy);
         IX.CreateButtonHandlers(container, proxy);
         IX.CreateBinders(container, proxy);
@@ -88,6 +89,14 @@ export class IX {
                     // the array but the UI elements haven't been created.  If we just do: 
                     // proxy[k] = container[k];   
                     // This will initialize the UI list but push duplicates of the into the array.
+
+                    // So, for arrays, we want to create the array proxy as an empty array during initialization instead,
+                    // then set the empty proxy to the container, then the container to the proxy.
+                    if (container[k]._id != k) {
+                        let newProxy = IXArrayProxy.Create(k, container);
+                        newProxy[k] = container[k];
+                        container[k] = newProxy;
+                    }
                     break;
             }
         });
@@ -150,13 +159,17 @@ export class IX {
                     container[k].attr = IXAttributeProxy.Create(k, container[k].attr);
                 }
 
+                if (container[k].classList) {
+                    console.log(`Creating proxy for classList ${k}`);
+                    container[k].classList = IXClassListProxy.Create(k, container[k].classList);
+                }
+
                 //if (container[k].title) {
                 //    // mouse over title event
                 //    el.addEventListener("mouseover", _ => el.setAttribute("title", container[k].title()));
                 //}
 
                 let idName = IX.UpperCaseFirstChar(el.id);
-
                 
                 // TODO: create a dictionary to handle this.
                 let changedEvent = `on${idName}Changed`;

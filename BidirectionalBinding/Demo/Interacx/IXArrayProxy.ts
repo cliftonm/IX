@@ -1,6 +1,7 @@
 ﻿export class IXArrayProxy {
     static Create(id: string, container: any): any {
-        let p = new Proxy(container[id], IXArrayProxy.ArrayChangeHandler);
+        // let p = new Proxy(container[id], IXArrayProxy.ArrayChangeHandler);
+        let p = new Proxy([], IXArrayProxy.ArrayChangeHandler);
         p._id = id;
         p._container = container;
 
@@ -28,27 +29,37 @@
             console.log('setting ' + prop + ' for ' + receiver._id + ' with value ' + val);
 
             if (!isNaN(prop)) {
-                let el = document.getElementById(receiver._id);
 
+                let el = document.getElementById(receiver._id);
                 switch (el.nodeName) {
                     case "OL":
                         let n = Number(prop);
-/*
-                        if (n < obj.length) {
-                            // Replace the existing LI element.
-                            let li = document.createElement("li") as HTMLLIElement;
-                            li.innerText = val;
-                            let ol = el as HTMLOListElement;
-                            // ol.childNodes[n] = li;
-                        } else {
-*/
+                        /*
+                                                if (n < obj.length) {
+                                                    // Replace the existing LI element.
+                                                    let li = document.createElement("li") as HTMLLIElement;
+                                                    li.innerText = val;
+                                                    let ol = el as HTMLOListElement;
+                                                    // ol.childNodes[n] = li;
+                                                } else {
+                        */
                         {
                             let li = document.createElement("li") as HTMLLIElement;
                             li.innerText = val;
                             (el as HTMLOListElement).append(li);
                         }
+
                         break;
                 }
+            } else if (val.constructor.name == "Array") {
+                let el = document.getElementById(receiver._id);
+
+                // remove all child LI elements.
+                (val as []).forEach(v => {
+                    let li = document.createElement("li") as HTMLLIElement;
+                    li.innerText = v;
+                    (el as HTMLOListElement).append(li);
+                });
             }
 
             // Return true to accept change.  Note that we can implement a "BeforeChange" event call on the container if we want to add logic to accept the change.

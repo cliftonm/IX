@@ -1,4 +1,12 @@
-﻿.reset {
+﻿.pass {
+    color: green;
+}
+
+.fail {
+    color: red;
+}
+
+.reset {
     clear: both;
 }
 

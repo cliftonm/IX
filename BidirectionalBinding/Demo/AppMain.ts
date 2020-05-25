@@ -88,8 +88,8 @@ export class AppMain {
         let listForm = IX.CreateProxy(new ListExample());
         // listForm.someList[1] = "Learn IX!";
         // let listForm = IX.CreateProxy(new ListExample());
-        // let items = ["Learn Javascript", "Learn IX", "Wear a mask!"];
-        // listForm.someList = items;
+        let items = ["Learn Javascript", "Learn IX", "Wear a mask!"];
+        listForm.someList = items;
 
         IX.CreateProxy(new BidirectionalExample());
         IX.CreateProxy(new ReverseExample());
