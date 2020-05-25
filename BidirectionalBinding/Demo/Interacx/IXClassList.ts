@@ -7,4 +7,8 @@
     public Add(className: string): void {
         this.add = className;    
     }
+
+    public Remove(className: string): void {
+        this.remove = className;
+    }
 }

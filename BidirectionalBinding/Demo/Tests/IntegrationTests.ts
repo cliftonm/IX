@@ -12,19 +12,18 @@ class Assert {
 }
 
 class InputInitializedTest {
-    lbl1 = {
-        classList: new IXClassList()
-    }
-
+    lbl1 = { classList: new IXClassList() }
     inputTest1 = "Test";
 }
 
 class InputAssignmentTest {
-    lbl2 = {
-        classList: new IXClassList()
-    }
-
+    lbl2 = { classList: new IXClassList() }
     inputTest2 = "";
+}
+
+class InputSetsPropertyTest {
+    lbl3 = { classList: new IXClassList() }
+    inputTest3 = "";
 }
 
 export class IntegrationTests {
@@ -32,6 +31,7 @@ export class IntegrationTests {
     public run() {
         IntegrationTests.InputElementSetOnInitializationTest();
         IntegrationTests.InputElementSetOnAssignmentTest();
+        IntegrationTests.InputSetsPropertyTest();
     }
 
     static InputElementSetOnInitializationTest(): void {
@@ -43,5 +43,13 @@ export class IntegrationTests {
         let test = IX.CreateProxy(new InputAssignmentTest());
         test.inputTest2 = "Test";
         Assert.Equal((document.getElementById("inputTest2") as HTMLInputElement).value, "Test", test.lbl2.classList);
+    }
+
+    static InputSetsPropertyTest(): void {
+        let test = IX.CreateProxy(new InputSetsPropertyTest());
+        let el = (document.getElementById("inputTest3") as HTMLInputElement);
+        el.value = "Test";
+        el.dispatchEvent(new Event('change'));      // Sigh.
+        Assert.Equal(test.inputTest3, "Test", test.lbl3.classList);
     }
 }

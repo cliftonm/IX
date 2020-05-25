@@ -180,14 +180,15 @@ export class IX {
                     IX.WireUpEventHandler(el, container, proxy, null, "mouseover", hoverEvent);
                 }
 
-                if (container[changedEvent]) {
+                // Change event is always wired up so we set the container's value when the UI element value changes.
+                // if (container[changedEvent]) {
                     switch (el.nodeName) {
                         case "INPUT":
                             // TODO: If this is a button type, then what?
                             IX.WireUpEventHandler(el, container, proxy, "value", "change", changedEvent);
                             break;
                     }
-                }
+                // }
 
                 if (container[keyUpEvent]) {
                     switch (el.nodeName) {
@@ -245,12 +246,12 @@ export class IX {
             let ucPropName = IX.UpperCaseFirstChar(propName ?? "");
             let handler = container[handlerName];
 
-            if (handler) {
-                if (propertyName) {
-                    newVal = IX.CustomConverter(proxy, ucPropName, newVal);
-                    container[propName] = newVal;
-                }
+            if (propertyName) {
+                newVal = IX.CustomConverter(proxy, ucPropName, newVal);
+                container[propName] = newVal;
+            }
 
+            if (handler) {
                 (handler as IXEvent).Invoke(newVal, proxy, oldVal);
             }
         });
