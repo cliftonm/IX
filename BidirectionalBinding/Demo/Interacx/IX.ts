@@ -257,22 +257,6 @@ export class IX {
         });
     }
 
-    private static LeftOf(s: string, search: string): string {
-        return s.substring(0, s.indexOf(search));
-    }
-
-    private static RightOf(s: string, search: string): string {
-        return s.substring(s.indexOf(search) + 1);
-    }
-
-    private static LowerCaseFirstChar(s: string): string {
-        return s.charAt(0).toLowerCase() + s.slice(1);
-    }
-
-    private static UpperCaseFirstChar(s: string): string {
-        return s.charAt(0).toUpperCase() + s.slice(1);
-    }
-
     private static CustomConverter<T>(container: T, ucPropName: string, newVal: string): any {
         let converter = `onConvert${ucPropName}`;
 
@@ -281,5 +265,23 @@ export class IX {
         }
 
         return newVal;
+    }
+
+    // Helpers
+
+    public static LeftOf(s: string, search: string): string {
+        return s.substring(0, s.indexOf(search));
+    }
+
+    public static RightOf(s: string, search: string): string {
+        return s.substring(s.indexOf(search) + 1);
+    }
+
+    public static LowerCaseFirstChar(s: string): string {
+        return s.charAt(0).toLowerCase() + s.slice(1);
+    }
+
+    public static UpperCaseFirstChar(s: string): string {
+        return s.charAt(0).toUpperCase() + s.slice(1);
     }
 }

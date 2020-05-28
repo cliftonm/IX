@@ -1,4 +1,6 @@
-﻿export class IXArrayProxy {
+﻿import { IXTemplate } from "./IXTemplate"
+
+export class IXArrayProxy {
     static Create(id: string, container: any): any {
         // let p = new Proxy(container[id], IXArrayProxy.ArrayChangeHandler);
         let p = new Proxy([], IXArrayProxy.ArrayChangeHandler);
@@ -45,7 +47,15 @@
                         */
                         {
                             let li = document.createElement("li") as HTMLLIElement;
-                            li.innerText = val;
+
+                            if (val._isTemplate) {
+                                let t = val as IXTemplate;
+                                li.innerText = t.value;
+                                li.id = t.id;
+                            } else {
+                                li.innerText = val;
+                            }
+
                             (el as HTMLOListElement).append(li);
                         }
 

@@ -97,6 +97,7 @@
     <TypeScriptCompile Include="Interacx\IXEvent.ts" />
     <TypeScriptCompile Include="Interacx\IX.ts" />
     <TypeScriptCompile Include="Interacx\IXSubscriber.ts" />
+    <TypeScriptCompile Include="Interacx\IXTemplate.ts" />
     <TypeScriptCompile Include="modules\require.d.ts" />
     <TypeScriptCompile Include="Tests\IntegrationTests.ts" />
     <TypeScriptCompile Include="Tests\IntegrationTestsConfig.ts" />
