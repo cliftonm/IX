@@ -17,10 +17,24 @@ export class IXArrayProxy {
                 return true;
             }
 
-            // Prevent infinite recursion when logging.
-            if (prop != "_id") {
-                console.log('getting ' + prop + ' for ' + receiver._id);
+            // Setup for push and pop, preserve state when the setter is called.
+            // Very kludgy but I don't know of any other way to do this.
+            if (prop == "push") {
+                receiver._push = true;
             }
+
+            if (prop == "pop") {
+                receiver._pop = true;
+            }
+
+            if (prop == "length") {
+                return obj[receiver._id].length;
+            }
+
+            // Prevent infinite recursion when logging.
+            //if (prop != "_id") {
+            //    console.log('getting ' + prop + ' for ' + receiver._id);
+            //}
 
             return obj[prop];
         },
@@ -28,49 +42,66 @@ export class IXArrayProxy {
         set: function (obj, prop, val, receiver) {
             // we're looking for this pattern:
             // "setting 0 for someList with value Learn Javascript"
-            console.log('setting ' + prop + ' for ' + receiver._id + ' with value ' + val);
+            let id = receiver._id;
+            console.log('setting ' + prop + ' for ' + id + ' with value ' + val);
 
-            if (!isNaN(prop)) {
+            if (prop == "length" && receiver._pop) {
+                let el = document.getElementById(id);
+                let len = obj[id].length;
 
-                let el = document.getElementById(receiver._id);
-                switch (el.nodeName) {
-                    case "OL":
-                        let n = Number(prop);
-                        let ol = el as HTMLOListElement;
+                for (let i = val; i < len; i++) {
+                    el.childNodes[val].remove();
+                    obj[id].pop();
+                }
 
-                        if (n < ol.childNodes.length) {
-                            // We are replacing a node
-                            // innerText or innerHTML?
-                            (ol.childNodes[n] as HTMLLIElement).innerText = val;
-                        } else {
-                            let li = document.createElement("li") as HTMLLIElement;
+                receiver._pop = false;
+            } else {
+                if (!isNaN(prop)) {
 
-                            if (val._isTemplate) {
-                                let t = val as IXTemplate;
-                            // innerText or innerHTML?
-                                li.innerText = t.value;
-                                li.id = t.id;
+                    let el = document.getElementById(id);
+                    switch (el.nodeName) {
+                        case "OL":
+                            let n = Number(prop);
+                            let ol = el as HTMLOListElement;
+
+                            if (n < ol.childNodes.length && !receiver._push) {
+                                // We are replacing a node
+                                // innerText or innerHTML?
+                                (ol.childNodes[n] as HTMLLIElement).innerText = val;
                             } else {
-                                li.innerText = val;
+                                let li = document.createElement("li") as HTMLLIElement;
+                                let v = val;
+
+                                if (val._isTemplate) {
+                                    let t = val as IXTemplate;
+                                    // innerText or innerHTML?
+                                    li.innerText = t.value;
+                                    li.id = t.id;
+                                    v = t.value;
+                                } else {
+                                    li.innerText = val;
+                                }
+
+                                (el as HTMLOListElement).append(li);
+                                obj[id].push(v);
+                                receiver._push = false;
                             }
 
-                            (el as HTMLOListElement).append(li);
-                        }
+                            break;
+                    }
+                } else if (val.constructor.name == "Array") {
+                    let el = document.getElementById(id);
 
-                        break;
+                    // remove all child LI elements.
+                    (val as []).forEach(v => {
+                        let li = document.createElement("li") as HTMLLIElement;
+                        li.innerText = v;
+                        (el as HTMLOListElement).append(li);
+                    });
                 }
-            } else if (val.constructor.name == "Array") {
-                let el = document.getElementById(receiver._id);
-
-                // remove all child LI elements.
-                (val as []).forEach(v => {
-                    let li = document.createElement("li") as HTMLLIElement;
-                    li.innerText = v;
-                    (el as HTMLOListElement).append(li);
-                });
             }
 
-            // Return true to accept change.  Note that we can implement a "BeforeChange" event call on the container if we want to add logic to accept the change.
+            // Whe an array is being set to the id, this initializes obj[prop] is equivalent to receiver[id]
             obj[prop] = val;
 
             return true;

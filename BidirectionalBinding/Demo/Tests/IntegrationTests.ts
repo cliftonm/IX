@@ -30,7 +30,8 @@ export class IntegrationTests {
             { testFnc: IntegrationTests.ListInitializedTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
             { testFnc: IntegrationTests.ReplaceInitializedTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
             { testFnc: IntegrationTests.ChangeListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
-            { testFnc: IntegrationTests.AppendListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" }
+            { testFnc: IntegrationTests.PushListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
+            { testFnc: IntegrationTests.PopListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" }
         ];
 
         let testForm = IX.CreateProxy(new TestResults());
@@ -140,7 +141,7 @@ export class IntegrationTests {
         IXAssert.Equal((el.childNodes[2] as HTMLLIElement).innerText, "C");
     }
 
-    static AppendListItemTest(obj): void {
+    static PushListItemTest(obj): void {
         let test = IX.CreateProxy(obj);
         test.list.push("D");
         let el = (document.getElementById("list") as HTMLOListElement);
@@ -149,5 +150,14 @@ export class IntegrationTests {
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
         IXAssert.Equal((el.childNodes[2] as HTMLLIElement).innerText, "C");
         IXAssert.Equal((el.childNodes[3] as HTMLLIElement).innerText, "D");
+    }
+
+    static PopListItemTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        test.list.pop();
+        let el = (document.getElementById("list") as HTMLOListElement);
+        IXAssert.Equal(el.childElementCount, 2);
+        IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
+        IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
     }
 }
