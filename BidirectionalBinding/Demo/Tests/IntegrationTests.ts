@@ -1,24 +1,9 @@
 ﻿import { IX } from "../Interacx/IX"
+import { IXAssert } from "../Interacx/IXAssert"
 import { IXBinder } from "../Interacx/IXBinder"
 import { IXClassList } from "../Interacx/IXClassList"
 import { IXEvent } from "../Interacx/IXEvent"
 import { IXTemplate } from "../Interacx/IXTemplate"
-
-class Assert {
-    public static Equal(got: string, expected: string): void {
-        let b = got == expected;
-
-        if (!b) {
-            throw `Expected ${expected}, got ${got}`;
-        }
-    }
-
-    public static IsTrue(b: boolean): void {
-        if (!b) {
-            throw "Not true";
-        }
-    }
-}
 
 class TestResults {
     // Initialize fields so they get proxied when the proxy is created.
@@ -56,12 +41,12 @@ export class IntegrationTests {
             // Push a template to OL, where the template value is simply the test name, to the test results ordered list.
             testForm.tests.push(IXTemplate.Create({ value: testName, id: id }));
 
-            // Create an object with the id and proxy it.
+            // Create an object with the id and proxy it.  This will match the id of the template we just created, so we can set its style.
             // This is a great example of not actually needing to create a class, which is really
             // just a dictionary.
             let obj = {};
 
-            // The classList here allows us to set the element's class to indicate success/failure of the test.
+            // The classList here allows us to set the test LI element style class to indicate success/failure of the test.
             obj[id] = { classList: new IXClassList() };     
             let testProxy = IX.CreateProxy(obj);
 
@@ -104,13 +89,13 @@ export class IntegrationTests {
 
     static InputElementSetOnInitializationTest(obj, id): void {
         IX.CreateProxy(obj);
-        Assert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test");
+        IXAssert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test");
     }
 
     static InputElementSetOnAssignmentTest(obj, id): void {
         let test = IX.CreateProxy(obj);
         test.inputTest = "Test";
-        Assert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test");
+        IXAssert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test");
     }
 
     static InputSetsPropertyTest(obj, id): void {
@@ -118,15 +103,15 @@ export class IntegrationTests {
         let el = (document.getElementById("inputTest") as HTMLInputElement);
         el.value = "Test";
         el.dispatchEvent(new Event('change'));      // Sigh.
-        Assert.Equal(test.inputTest, "Test");
+        IXAssert.Equal(test.inputTest, "Test");
     }
 
     static ListInitializedTest(obj, id): void {
         IX.CreateProxy(obj);
         let el = (document.getElementById("list") as HTMLOListElement);
-        Assert.IsTrue(el.childElementCount == 3);
-        Assert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
-        Assert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
-        Assert.Equal((el.childNodes[2] as HTMLLIElement).innerText, "C");
+        IXAssert.IsTrue(el.childElementCount == 3);
+        IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
+        IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
+        IXAssert.Equal((el.childNodes[2] as HTMLLIElement).innerText, "C");
     }
 }

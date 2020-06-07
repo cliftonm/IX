@@ -90,6 +90,7 @@
     <TypeScriptCompile Include="AppConfig.ts" />
     <TypeScriptCompile Include="AppMain.ts" />
     <TypeScriptCompile Include="Interacx\IXArrayProxy.ts" />
+    <TypeScriptCompile Include="Interacx\IXAssert.ts" />
     <TypeScriptCompile Include="Interacx\IXAttributeProxy.ts" />
     <TypeScriptCompile Include="Interacx\IXBinder.ts" />
     <TypeScriptCompile Include="Interacx\IXClassList.ts" />
