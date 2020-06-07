@@ -15,6 +15,8 @@ class TestResults {
     testDom: string = "";           
 }
 
+// Use page: Tests/IntegrationTests.html
+
 export class IntegrationTests {
     public run() {
         // Defines:
@@ -25,7 +27,9 @@ export class IntegrationTests {
             { testFnc: IntegrationTests.InputElementSetOnInitializationTest, obj: { inputTest: "Test" }, dom: "<input id='inputTest'/>" },
             { testFnc: IntegrationTests.InputElementSetOnAssignmentTest, obj: { inputTest: "" }, dom: "<input id='inputTest'/>" },
             { testFnc: IntegrationTests.InputSetsPropertyTest, obj: { inputTest: "" }, dom: "<input id='inputTest'/>" },
-            { testFnc: IntegrationTests.ListInitializedTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" }
+            { testFnc: IntegrationTests.ListInitializedTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
+            { testFnc: IntegrationTests.ReplaceInitializedTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
+            { testFnc: IntegrationTests.ChangeListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" }
         ];
 
         let testForm = IX.CreateProxy(new TestResults());
@@ -87,18 +91,18 @@ export class IntegrationTests {
 
     // We don't use a proxies here to verify the test DOM state, as that would defeat the purpose of the test.
 
-    static InputElementSetOnInitializationTest(obj, id): void {
+    static InputElementSetOnInitializationTest(obj): void {
         IX.CreateProxy(obj);
         IXAssert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test");
     }
 
-    static InputElementSetOnAssignmentTest(obj, id): void {
+    static InputElementSetOnAssignmentTest(obj): void {
         let test = IX.CreateProxy(obj);
         test.inputTest = "Test";
         IXAssert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test");
     }
 
-    static InputSetsPropertyTest(obj, id): void {
+    static InputSetsPropertyTest(obj): void {
         let test = IX.CreateProxy(obj);
         let el = (document.getElementById("inputTest") as HTMLInputElement);
         el.value = "Test";
@@ -106,12 +110,32 @@ export class IntegrationTests {
         IXAssert.Equal(test.inputTest, "Test");
     }
 
-    static ListInitializedTest(obj, id): void {
+    static ListInitializedTest(obj): void {
         IX.CreateProxy(obj);
         let el = (document.getElementById("list") as HTMLOListElement);
-        IXAssert.IsTrue(el.childElementCount == 3);
+        IXAssert.Equal(el.childElementCount, 3);
         IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
+        IXAssert.Equal((el.childNodes[2] as HTMLLIElement).innerText, "C");
+    }
+
+    static ReplaceInitializedTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        test.list = ["D", "E", "F"];
+        let el = (document.getElementById("list") as HTMLOListElement);
+        IXAssert.Equal(el.childElementCount, 3);
+        IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "D");
+        IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "E");
+        IXAssert.Equal((el.childNodes[2] as HTMLLIElement).innerText, "F");
+    }
+
+    static ChangeListItemTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        test.list[1] = "Q";
+        let el = (document.getElementById("list") as HTMLOListElement);
+        IXAssert.Equal(el.childElementCount, 3);
+        IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
+        IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "Q");
         IXAssert.Equal((el.childNodes[2] as HTMLLIElement).innerText, "C");
     }
 }

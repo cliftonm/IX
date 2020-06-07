@@ -34,9 +34,16 @@ export class IX {
                 case "OL":
                     // We expect an array.
                     if (val.constructor?.name == "Array") {
-                        // obj[prop] = [];     // Clear the current array, as we're recreating it with the val array.
+                        // Remove the list elements as we're replacing them with a new array.
+                        let ol = el as HTMLOListElement;
+
+                        while (ol.firstChild) {
+                            ol.removeChild(ol.firstChild);
+                        }
+
                         (val as []).forEach(v => obj[prop].push(v));
                     }
+
                     break;
             }
 
@@ -108,6 +115,7 @@ export class IX {
         return ret;
     }
 
+/*
     private static CreateArrayProxies<T>(container: T, proxy: T): void {
         // Set the ID for the ProxyArray, as we cannot determine the ID in the getter/setter itself because 
         // the proxy is operating on the array, not the container's property of the array.
@@ -122,6 +130,7 @@ export class IX {
             }
         });
     }
+*/
 
     private static CreateBinders<T>(container: T, proxy: T): void {
         Object.keys(container).forEach(k => {

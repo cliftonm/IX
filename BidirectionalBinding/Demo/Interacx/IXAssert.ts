@@ -1,5 +1,5 @@
 ﻿export class IXAssert {
-    public static Equal(got: string, expected: string): void {
+    public static Equal(got: any, expected: any): void {
         let b = got == expected;
 
         if (!b) {
