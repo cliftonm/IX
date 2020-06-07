@@ -12,65 +12,87 @@ class Assert {
     }
 }
 
-class TestForm {
+class TestResults {
+    // Initialize fields so they get proxied when the proxy is created.
+
+    // This is the OL element for each test.
     tests: IXTemplate[] = [];
-}
 
-class InputInitializedTest {
-    lbl1 = { classList: new IXClassList() }
-    inputTest1 = "Test";
-}
-
-class InputAssignmentTest {
-    lbl2 = { classList: new IXClassList() }
-    inputTest2 = "";
-}
-
-class InputSetsPropertyTest {
-    lbl3 = { classList: new IXClassList() }
-    inputTest3 = "";
+    // This is the DIV element that is a container for the specific test DOM.
+    testDom: string = "";           
 }
 
 export class IntegrationTests {
     public run() {
+        // Defines:
+        // The test function
+        // The "class" (i.e. container) for binding, events, etc.
+        // The HTML needed to perform the test.
         let tests = [
-            IntegrationTests.InputElementSetOnInitializationTest,
-            IntegrationTests.InputElementSetOnAssignmentTest,
-            IntegrationTests.InputSetsPropertyTest,
+            { testFnc: IntegrationTests.InputElementSetOnInitializationTest, obj: { inputTest: "Test" }, dom: "<input id='inputTest'/>" },
+            { testFnc: IntegrationTests.InputElementSetOnAssignmentTest, obj: { inputTest: "" }, dom: "<input id='inputTest'/>" },
+            { testFnc: IntegrationTests.InputSetsPropertyTest, obj: { inputTest: "" }, dom: "<input id='inputTest'/>" }
         ];
 
-        let testForm = IX.CreateProxy(new TestForm());
-                tests.forEach(test => {
-            let testName = IX.LeftOf(test.toString(), "(");
+        let testForm = IX.CreateProxy(new TestResults());
+
+        tests.forEach(test => {
+            // Get just the name of the test function.
+            let testName = IX.LeftOf(test.testFnc.toString(), "(");
+
+            // The ID will start with a lowercase letter
             let id = IX.LowerCaseFirstChar(testName);
+
+            // Push that to the test results ordered list.
             testForm.tests.push(IXTemplate.Create({ value: testName, id: id }));
-            console.log(testName);
 
             // Create an object with the id and proxy it.
+            // This is a great example of not actually needing to create a class, which is really
+            // just a dictionary.
             let obj = {};
-            obj[id] = { classList: new IXClassList() };
-            let objProxy = IX.CreateProxy(obj);
 
-            test(objProxy, id);
+            // The classList here allows us to set the element's class to indicate success/failure of the test.
+            obj[id] = { classList: new IXClassList() };     
+            let testProxy = IX.CreateProxy(obj);
+
+            // Create the DOM needed for the test.
+            this.CreateTestDom(testForm, test.dom);
+
+            // Run the test.
+            test.testFnc(testProxy, test.obj, id);
+
+            // Remove the DOM needed for the test.
+            this.RemoveTestDom(testForm);
         });
     }
 
-    static InputElementSetOnInitializationTest(proxy, id): void {
-        IX.CreateProxy(new InputInitializedTest());
-        Assert.Equal((document.getElementById("inputTest1") as HTMLInputElement).value, "Test", proxy[id].classList);
+    CreateTestDom(testForm: TestResults, testDom: string): void {
+        testForm.testDom = testDom;
     }
 
-    static InputElementSetOnAssignmentTest(proxy, id): void {
-        let test = IX.CreateProxy(new InputAssignmentTest());
-        test.inputTest2 = "Test";
-        Assert.Equal((document.getElementById("inputTest2") as HTMLInputElement).value, "Test", proxy[id].classList);
+    RemoveTestDom(testForm: TestResults, ): void {
+        testForm.testDom = "";
     }
 
-    static InputSetsPropertyTest(proxy, id): void {
-        let test = IX.CreateProxy(new InputSetsPropertyTest());
-        let el = (document.getElementById("inputTest3") as HTMLInputElement);
+    static InputElementSetOnInitializationTest(proxy, obj, id): void {
+        IX.CreateProxy(obj);
+        // We don't use a proxy here, as that would defeat the purpose of the test.
+        Assert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test", proxy[id].classList);
+    }
+
+    static InputElementSetOnAssignmentTest(proxy, obj, id): void {
+        let test = IX.CreateProxy(obj);
+        test.inputTest = "Test";
+        // We don't use a proxy here, as that would defeat the purpose of the test.
+        Assert.Equal((document.getElementById("inputTest") as HTMLInputElement).value, "Test", proxy[id].classList);
+    }
+
+    static InputSetsPropertyTest(proxy, obj, id): void {
+        let test = IX.CreateProxy(obj);
+        // We don't use a proxy here, as that would defeat the purpose of the test.
+        let el = (document.getElementById("inputTest") as HTMLInputElement);
         el.value = "Test";
         el.dispatchEvent(new Event('change'));      // Sigh.
-        Assert.Equal(test.inputTest3, "Test", proxy[id].classList);
+        Assert.Equal(test.inputTest, "Test", proxy[id].classList);
     }
 }
