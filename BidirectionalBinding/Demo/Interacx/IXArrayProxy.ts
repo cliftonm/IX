@@ -36,20 +36,18 @@ export class IXArrayProxy {
                 switch (el.nodeName) {
                     case "OL":
                         let n = Number(prop);
-                        /*
-                                                if (n < obj.length) {
-                                                    // Replace the existing LI element.
-                                                    let li = document.createElement("li") as HTMLLIElement;
-                                                    li.innerText = val;
-                                                    let ol = el as HTMLOListElement;
-                                                    // ol.childNodes[n] = li;
-                                                } else {
-                        */
-                        {
+                        let ol = el as HTMLOListElement;
+
+                        if (n < ol.childNodes.length) {
+                            // We are replacing a node
+                            // innerText or innerHTML?
+                            (ol.childNodes[n] as HTMLLIElement).innerText = val;
+                        } else {
                             let li = document.createElement("li") as HTMLLIElement;
 
                             if (val._isTemplate) {
                                 let t = val as IXTemplate;
+                            // innerText or innerHTML?
                                 li.innerText = t.value;
                                 li.id = t.id;
                             } else {
