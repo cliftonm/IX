@@ -11,5 +11,9 @@
 
         return template;
     }
+
+    public SetValue(val: string): void {
+        document.getElementById(this.id).innerText = val;
+    }
 }
 
