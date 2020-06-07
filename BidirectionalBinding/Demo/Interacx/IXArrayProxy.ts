@@ -56,8 +56,8 @@ export class IXArrayProxy {
 
                 receiver._pop = false;
             } else {
+                // We might be setting an array item, or we might be doing a push, in either case "prop" is the index value.
                 if (!isNaN(prop)) {
-
                     let el = document.getElementById(id);
                     switch (el.nodeName) {
                         case "OL":
