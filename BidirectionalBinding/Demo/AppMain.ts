@@ -63,7 +63,7 @@ class BidirectionalExample {
     input2: string = "";
     input3: string = "";
     message2 = new IXBinder({ bindFrom: IX.nameof(() => this.input2) });
-    message3 = new IXBinder({ bindFrom: IX.nameof(() => this.input2) })
+    message3 = new IXBinder({ bindFrom: "input2" })        // Seems like using a string here is reasonable.
                  .Add({ bindFrom: IX.nameof(() => this.input3), op: v=>v.split('').reverse().join('') });
 
     // onInput2KeyUp = new IXEvent().Add((v, p: BidirectionalExample) => p.message2 = v);

@@ -41,7 +41,8 @@ export class IntegrationTests {
                 testFnc: IntegrationTests.ConvertTest,
                 obj: { inputTest: "", onConvertInputTest: s => `${s} Converted!` },
                 dom: "<input id='inputTest'/>"
-            }
+            },
+            { testFnc: IntegrationTests.VisibleAttributeTest, obj: { inputTest: { attr: { visible: true } } }, dom: "<input id='inputTest'/>" }
         ];
 
         let testForm = IX.CreateProxy(new TestResults());
@@ -116,7 +117,7 @@ export class IntegrationTests {
 
     static InputSetsPropertyTest(obj): void {
         let test = IX.CreateProxy(obj);
-        let el = (document.getElementById("inputTest") as HTMLInputElement);
+        let el = document.getElementById("inputTest") as HTMLInputElement;
         el.value = "Test";
         el.dispatchEvent(new Event('change'));      // Sigh.
         IXAssert.Equal(test.inputTest, "Test");
@@ -124,7 +125,7 @@ export class IntegrationTests {
 
     static ListInitializedTest(obj): void {
         IX.CreateProxy(obj);
-        let el = (document.getElementById("list") as HTMLOListElement);
+        let el = document.getElementById("list") as HTMLOListElement;
         IXAssert.Equal(el.childElementCount, 3);
         IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
@@ -134,7 +135,7 @@ export class IntegrationTests {
     static ReplaceInitializedTest(obj): void {
         let test = IX.CreateProxy(obj);
         test.list = ["D", "E", "F"];
-        let el = (document.getElementById("list") as HTMLOListElement);
+        let el = document.getElementById("list") as HTMLOListElement;
         IXAssert.Equal(el.childElementCount, 3);
         IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "D");
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "E");
@@ -144,7 +145,7 @@ export class IntegrationTests {
     static ChangeListItemTest(obj): void {
         let test = IX.CreateProxy(obj);
         test.list[1] = "Q";
-        let el = (document.getElementById("list") as HTMLOListElement);
+        let el = document.getElementById("list") as HTMLOListElement;
         IXAssert.Equal(el.childElementCount, 3);
         IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "Q");
@@ -154,7 +155,7 @@ export class IntegrationTests {
     static PushListItemTest(obj): void {
         let test = IX.CreateProxy(obj);
         test.list.push("D");
-        let el = (document.getElementById("list") as HTMLOListElement);
+        let el = document.getElementById("list") as HTMLOListElement;
         IXAssert.Equal(el.childElementCount, 4);
         IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
@@ -165,7 +166,7 @@ export class IntegrationTests {
     static PopListItemTest(obj): void {
         let test = IX.CreateProxy(obj);
         test.list.pop();
-        let el = (document.getElementById("list") as HTMLOListElement);
+        let el = document.getElementById("list") as HTMLOListElement;
         IXAssert.Equal(el.childElementCount, 2);
         IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
@@ -173,16 +174,25 @@ export class IntegrationTests {
 
     static ButtonClickTest(obj): void {
         let test = IX.CreateProxy(obj);
-        let el = (document.getElementById("button") as HTMLButtonElement);
+        let el = document.getElementById("button") as HTMLButtonElement;
         el.dispatchEvent(new Event('click')); 
         IXAssert.Equal(test.clicked, true);
     }
 
     static ConvertTest(obj): void {
         let test = IX.CreateProxy(obj);
-        let el = (document.getElementById("inputTest") as HTMLInputElement);
+        let el = document.getElementById("inputTest") as HTMLInputElement;
         el.value = "Test";
         el.dispatchEvent(new Event('change')); 
         IXAssert.Equal(test.inputTest, "Test Converted!");
+    }
+
+    static VisibleAttributeTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        let el = document.getElementById("inputTest") as HTMLInputElement;
+        test.inputTest.attr.visible = false;
+        IXAssert.Equal(el.style.visibility, "hidden");
+        test.inputTest.attr.visible = true;
+        IXAssert.Equal(el.style.visibility, "visible");
     }
 }
