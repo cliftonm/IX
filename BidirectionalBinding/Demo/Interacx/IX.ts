@@ -231,6 +231,7 @@ export class IX {
                             if (el.getAttribute("type") == "button") {
                                 IX.WireUpEventHandler(el, container, proxy, null, "click", k);
                             }
+
                             break;
                     }
                 }

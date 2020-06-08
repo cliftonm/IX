@@ -36,6 +36,11 @@ export class IntegrationTests {
                 testFnc: IntegrationTests.ButtonClickTest,
                 obj: { clicked: false, onButtonClicked : new IXEvent().Add((_, p) => p.clicked = true)},
                 dom: "<button id='button'></button>"
+            },
+            {
+                testFnc: IntegrationTests.ConvertTest,
+                obj: { inputTest: "", onConvertInputTest: s => `${s} Converted!` },
+                dom: "<input id='inputTest'/>"
             }
         ];
 
@@ -171,5 +176,13 @@ export class IntegrationTests {
         let el = (document.getElementById("button") as HTMLButtonElement);
         el.dispatchEvent(new Event('click')); 
         IXAssert.Equal(test.clicked, true);
+    }
+
+    static ConvertTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        let el = (document.getElementById("inputTest") as HTMLInputElement);
+        el.value = "Test";
+        el.dispatchEvent(new Event('change')); 
+        IXAssert.Equal(test.inputTest, "Test Converted!");
     }
 }
