@@ -144,7 +144,7 @@ export class IX {
                     console.log(`Binding receiver ${k} to sender ${elName}`);
                     el.addEventListener("keyup", ev => {
                         let v = (ev.currentTarget as HTMLInputElement).value;
-                        proxy[elName] = v;
+                        // proxy[elName] = v;    --- why?
                         v = b.op === undefined ? v : b.op(v);
                         proxy[k] = v;
                     });
