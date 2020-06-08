@@ -18,33 +18,33 @@ export class IX {
 
             if (!el) {
                 console.log(`${prop} not found!.`);
-            }
+            } else {
+                switch (el.nodeName) {
+                    case "DIV":
+                    case "P":
+                    case "LABEL":
+                        (el as HTMLElement).innerHTML = val;
+                        break;
 
-            switch (el.nodeName) {
-                case "DIV":
-                case "P":
-                case "LABEL":
-                    (el as HTMLElement).innerHTML = val;
-                    break;
+                    case "INPUT":
+                        (el as HTMLInputElement).value = val;
+                        break;
 
-                case "INPUT":
-                    (el as HTMLInputElement).value = val;
-                    break;
+                    case "OL":
+                        // We expect an array.
+                        if (val.constructor?.name == "Array") {
+                            // Remove the list elements as we're replacing them with a new array.
+                            let ol = el as HTMLOListElement;
 
-                case "OL":
-                    // We expect an array.
-                    if (val.constructor?.name == "Array") {
-                        // Remove the list elements as we're replacing them with a new array.
-                        let ol = el as HTMLOListElement;
+                            while (ol.firstChild) {
+                                ol.removeChild(ol.firstChild);
+                            }
 
-                        while (ol.firstChild) {
-                            ol.removeChild(ol.firstChild);
+                            (val as []).forEach(v => obj[prop].push(v));
                         }
 
-                        (val as []).forEach(v => obj[prop].push(v));
-                    }
-
-                    break;
+                        break;
+                }
             }
 
             obj[prop] = val;

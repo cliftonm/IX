@@ -31,7 +31,12 @@ export class IntegrationTests {
             { testFnc: IntegrationTests.ReplaceInitializedTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
             { testFnc: IntegrationTests.ChangeListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
             { testFnc: IntegrationTests.PushListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
-            { testFnc: IntegrationTests.PopListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" }
+            { testFnc: IntegrationTests.PopListItemTest, obj: { list: ["A", "B", "C"] }, dom: "<ol id='list'></ol>" },
+            {
+                testFnc: IntegrationTests.ButtonClickTest,
+                obj: { clicked: false, onButtonClicked : new IXEvent().Add((_, p) => p.clicked = true)},
+                dom: "<button id='button'></button>"
+            }
         ];
 
         let testForm = IX.CreateProxy(new TestResults());
@@ -159,5 +164,12 @@ export class IntegrationTests {
         IXAssert.Equal(el.childElementCount, 2);
         IXAssert.Equal((el.childNodes[0] as HTMLLIElement).innerText, "A");
         IXAssert.Equal((el.childNodes[1] as HTMLLIElement).innerText, "B");
+    }
+
+    static ButtonClickTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        let el = (document.getElementById("button") as HTMLButtonElement);
+        el.dispatchEvent(new Event('click')); 
+        IXAssert.Equal(test.clicked, true);
     }
 }
