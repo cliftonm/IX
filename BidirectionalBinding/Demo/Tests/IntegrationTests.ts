@@ -42,7 +42,10 @@ export class IntegrationTests {
                 obj: { inputTest: "", onConvertInputTest: s => `${s} Converted!` },
                 dom: "<input id='inputTest'/>"
             },
-            { testFnc: IntegrationTests.VisibleAttributeTest, obj: { inputTest: { attr: { visible: true } } }, dom: "<input id='inputTest'/>" }
+            { testFnc: IntegrationTests.VisibleAttributeTest, obj: { inputTest: { attr: { visible: true } } }, dom: "<input id='inputTest'/>" },
+            { testFnc: IntegrationTests.ControlBindingTest, obj: { input: "123", output: new IXBinder({ bindFrom: "input" }) }, dom: "<input id='input'><p id='output'>" },
+            { testFnc: IntegrationTests.ControlBindingWithOperationTest, obj: { input: "123", output: new IXBinder({ bindFrom: "input", op: v => `${v} Operated!` }) }, dom: "<input id='input'><p id='output'>" },
+            { testFnc: IntegrationTests.ControlBindingAssignmentTest, obj: { input: "", output: new IXBinder({ bindFrom: "input" }) }, dom: "<input id='input'><p id='output'>" },
         ];
 
         let testForm = IX.CreateProxy(new TestResults());
@@ -194,5 +197,28 @@ export class IntegrationTests {
         IXAssert.Equal(el.style.visibility, "hidden");
         test.inputTest.attr.visible = true;
         IXAssert.Equal(el.style.visibility, "visible");
+    }
+
+    static ControlBindingTest(obj): void {
+        IX.CreateProxy(obj);
+        let elInput = document.getElementById("input") as HTMLInputElement;
+        let elOutput = document.getElementById("output") as HTMLElement;
+        elInput.dispatchEvent(new Event('keyup'));
+        IXAssert.Equal(elOutput.innerText, "123");
+    }
+
+    static ControlBindingWithOperationTest(obj): void {
+        IX.CreateProxy(obj);
+        let elInput = document.getElementById("input") as HTMLInputElement;
+        let elOutput = document.getElementById("output") as HTMLElement;
+        elInput.dispatchEvent(new Event('keyup'));
+        IXAssert.Equal(elOutput.innerText, "123 Operated!");
+    }
+
+    static ControlBindingAssignmentTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        let elOutput = document.getElementById("output") as HTMLElement;
+        test.input = "123";
+        IXAssert.Equal(elOutput.innerText, "123");
     }
 }
