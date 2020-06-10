@@ -27,7 +27,13 @@ export class IX {
                         break;
 
                     case "INPUT":
-                        (el as HTMLInputElement).value = val;
+                        let oldValue = (el as HTMLInputElement).value;
+
+                        if (oldValue != val) {
+                            (el as HTMLInputElement).value = val;
+                            el.dispatchEvent(new Event('changed'));
+                        }
+
                         break;
 
                     case "OL":
@@ -142,7 +148,17 @@ export class IX {
                     let elName = b.bindFrom;
                     let el = document.getElementById(elName);
                     console.log(`Binding receiver ${k} to sender ${elName}`);
+
+                    // Realtime
                     el.addEventListener("keyup", ev => {
+                        let v = (ev.currentTarget as HTMLInputElement).value;
+                        // proxy[elName] = v;    --- why?
+                        v = b.op === undefined ? v : b.op(v);
+                        proxy[k] = v;
+                    });
+
+                    // Lost focus, or called when value is set programmatically in the proxy setter.
+                    el.addEventListener("changed", ev => {
                         let v = (ev.currentTarget as HTMLInputElement).value;
                         // proxy[elName] = v;    --- why?
                         v = b.op === undefined ? v : b.op(v);
