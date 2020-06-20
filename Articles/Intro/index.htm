@@ -39,7 +39,25 @@ Studio's Intellisense.</li>
 	<li>It's really easy to wire up events and bindings.</li>
 <li>It was quite easy to write unit tests - in fact, the unit tests are one of 
 the more interesting aspects of this code, in my opinion.</li>
+	<li>I'm not putting &quot;declarative code&quot; in the HTML<ol>
+	<li>The HTML remains completely clean.</li>
+	<li>The business logic is implemented in code. </li>
+	<li>You don't have to inspect both code and HTML to figure out what in the 
+	world is actually going on.</li>
+</ol></li>
+	<li>Point #6</li>
+	<li>Point #6</li>
+	<li>Point #6</li>
 </ol>
+<p>I cannot reiterate enough how important, at least to me, point #6 is.&nbsp; 
+With a large web application, I have pulled my hair out bouncing between code 
+and markup to figure out what the conditions, loops, and rendering is, and it is 
+a frustrating experience.&nbsp; To me, the idea of including declarative syntax 
+at the UI level that is driven by effectively business data/rules is bad, no 
+horrible, design.&nbsp; It's why I don't use Razor or similar rendering engines.&nbsp; 
+I personally think that custom tags in the HTML, particularly &quot;if&quot; and &quot;loop&quot; 
+tags, to control UI rendering is one of the worst ideas to come out of so-called 
+modern web development.</p>
 <h3>Cons</h3>
 <p>So let's be realistic:</p>
 <ol>
@@ -258,6 +276,8 @@ IX.CreateProxy(new ReverseExample());</pre>
 <p>After clicking on the button:</p>
 <p><img border="0" src="r2.png" width="161" height="52"></p>
 <h2>Data Conversion</h2>
+<p>The following example is similar to Vue's <code>.number</code> attribute but the actual 
+implementation is much more general purpose.</p>
 <p>Consider this UI:</p>
 <p><img border="0" src="convert.png" width="548" height="52"></p>
 <p>And the markup (CSS and extraneous DIV's removed for readability):</p>
