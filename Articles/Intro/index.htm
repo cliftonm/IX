@@ -8,11 +8,10 @@
 
 <body>
 
-<p>TypeScript: Model - Element Binding, Two Way Data Binding, Events, And More</p>
-<p>Part I: Better than Vue?</p>
+<p>TypeScript Model - Element Binding, Two Way Data Binding, Events, And More 
+With Proxies</p>
 <h2>Introduction</h2>
-<p>I'm being somewhat flippant when I say &quot;better than Vue&quot; - this article 
-covers only the basics, and incomplete at that, but I have found it a useful 
+<p>I have found it a useful 
 exploration of how to leverage the Proxy type to bind class properties to 
 models, achieve two way binding, subscribe to UI events, and so forth, all using 
 actual &quot;edit-time&quot; types for type safety and Intellisense support - as in, no 
@@ -22,13 +21,50 @@ literals for ID's, which it seems that just about every one of those third party
 frameworks still is stuck on, and of course, native DOM manipulation is as well.&nbsp; 
 I also wanted to create a lightweight framework for providing two-way data 
 binding, events, attribute handling, and so forth.</p>
-<p>Thus &quot;IX&quot; is born, which is short for &quot;Interacx&quot;, which is a WinForm suite of 
+<p>Thus &quot;IX&quot; is born, which is short for &quot;Interacx&quot;, which 
+was a WinForm suite of 
 tools that I created a long time ago to automate data manipulation without using 
-an ORM.&nbsp; I decided to hijack the name since WinForm applications are, well, 
+an ORM.&nbsp; I decided to repurpose the name since WinForm applications are, well, 
 passé.</p>
 
-<p>So going back to my remark about being flippant, I'm going to compare how you use this framework against Vue 
-examples from the Vue website.</p>
+<p>And to make things interesting, I'm going to use some Vue examples as 
+comparison to the implementation I've developed here using proxies.</p>
+<h3>Pros</h3>
+<p>Working with the code I've developed here, I find several advantages:</p>
+<ol>
+	<li>I'm not hardcoding DOM ID string literals.</li>
+	<li>I'm able to leverage the type safety of TypeScript.</li>
+<li>Being able to refer to DOM elements as object properties leverages Visual 
+Studio's Intellisense.</li>
+	<li>It's really easy to wire up events and bindings.</li>
+<li>It was quite easy to write unit tests - in fact, the unit tests are one of 
+the more interesting aspects of this code, in my opinion.</li>
+</ol>
+<h3>Cons</h3>
+<p>So let's be realistic:</p>
+<ol>
+	<li>The syntax requires a specific mapping between the DOM element ID and 
+	the object's property name.</li>
+<li>Proxies are slower.</li>
+	<li>The code to work with proxies is highly specialized.</li>
+	<li>The code to work with arrays is bizarre.</li>
+	<li>The code here is really incomplete with regards to all the DOM 
+	attributes, properties, and events that could be handled.</li>
+	<li>I have no idea whether the code here is actually robust enough to handle 
+	#4.</li>
+	<li>I have yet to explore whether this concept works well with third party 
+	widget libraries, my favorite being jqWidgets.</li>
+</ol>
+<p>And I really doubt anyone is going to say, &quot;ooh, let's use IX to build a 
+major website&quot;, except perhaps for me!</p>
+<h3>So Why Bother?</h3>
+<ol>
+	<li>I like to explore different ways to solve the warts of web development.</li>
+<li>I haven't come across anyone else attempting this.</li>
+	<li>It's quite interesting to learn about proxies.</li>
+<li>This was fun!</li>
+</ol>
+<p>So without further ado, let's start exploring!</p>
 <h2>Simple Data Binding of Inner HTML</h2>
 <p>Let's start with simple data binding of the inner HTML associated with a <code>DIV</code>.</p>
 <h3>The Vue Way</h3>
@@ -180,8 +216,6 @@ listForm.someList.push(&quot;Wear a mask!&quot;);</pre>
 <pre>let listForm = IX.CreateProxy(new ListExample());
 let items = [&quot;Learn Javascript&quot;, &quot;Learn IX&quot;, &quot;Wear a mask!&quot;];
 listForm.someList = items;</pre>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
 <h2>Button Clicks</h2>
 <h3>The Vue Way</h3>
 <pre>&lt;div id=&quot;app-5&quot;&gt;
@@ -373,12 +407,171 @@ this contrived example:</p>
 }</pre>
 <p>and thus we get:</p>
 <p><img border="0" src="op1.png" width="313" height="49"></p>
+<h2>Checkboxes</h2>
+<h3>Binding Checkbox State</h3>
+<h4>The Vue Way</h4>
+<p>Vue has an elegant demonstration of binding the checkbox state to the label:</p>
+<pre>&lt;input type=&quot;checkbox&quot; id=&quot;checkbox&quot; v-model=&quot;checked&quot;&gt;
+&lt;label for=&quot;checkbox&quot;&gt;{{ checked }}&lt;/label&gt;</pre>
+<h4>The IX Way</h4>
+<p>Given:</p>
+<pre>&lt;input id=&quot;checkbox&quot; type=&quot;checkbox&quot; /&gt;
+&lt;label id=&quot;ckLabel&quot; for=&quot;checkbox&quot;&gt;&lt;/label&gt;</pre>
+<p>We continue to follow the pattern of using TypeScript classes and properties:</p>
+<pre>class CheckboxExample {
+  checkbox: boolean = false;
+  ckLabel = new IXBinder({ bindFrom: IX.nameof(() =&gt; this.checkbox) });
+}
+
+IX.CreateProxy(new CheckboxExample());</pre>
+<p>or, because the nameof syntax above is clumsy and we don't have a real &quot;nameof&quot; 
+operator in Javascript by the time the code is transpiled, so we have to revert 
+to string literals in this case:</p>
+<pre>class CheckboxExample {
+  checkbox: boolean = false;
+  ckLabel = new IXBinder({ bindFrom: &quot;checkbox&quot; });
+}
+
+IX.CreateProxy(new CheckboxExample());</pre>
+<p><img border="0" src="ckfalse.png" width="56" height="28"></p>
+<p><img border="0" src="cktrue.png" width="58" height="27"></p>
+<p>Or we can wire up the click event:</p>
+<pre>class CheckboxExample {
+  checkbox: boolean = false;
+  ckLabel: string = &quot;Unchecked&quot;;
+
+  onCheckboxClicked = 
+    new IXEvent().Add(
+      (_, p: CheckboxExample) =&gt; 
+          p.ckLabel = p.checkbox ? &quot;Checked&quot; : &quot;Unchecked&quot;);
+}
+
+IX.CreateProxy(new CheckboxExample());</pre>
+<p><img border="0" src="ckunchecked.png" width="94" height="27"></p>
+<p><img border="0" src="ckchecked.png" width="87" height="29"></p>
+<h3>Binding Checkbox Values</h3>
+<h4>The View Way</h4>
+<pre>&lt;input type=&quot;checkbox&quot; id=&quot;jack&quot; value=&quot;Jack&quot; v-model=&quot;checkedNames&quot;&gt;
+&lt;label for=&quot;jack&quot;&gt;Jack&lt;/label&gt;
+&lt;input type=&quot;checkbox&quot; id=&quot;john&quot; value=&quot;John&quot; v-model=&quot;checkedNames&quot;&gt;
+&lt;label for=&quot;john&quot;&gt;John&lt;/label&gt;
+&lt;input type=&quot;checkbox&quot; id=&quot;mike&quot; value=&quot;Mike&quot; v-model=&quot;checkedNames&quot;&gt;
+&lt;label for=&quot;mike&quot;&gt;Mike&lt;/label&gt;
+&lt;br&gt;
+&lt;span&gt;Checked names: {{ checkedNames }}&lt;/span&gt;</pre>
+<p>Note that the span text includes the array brackets:</p>
+<p><img border="0" src="viewckarray.png" width="251" height="69"></p>
+<h4>The IX Way</h4>
+<p>Given:</p>
+<pre>&lt;input id=&quot;jane&quot; value=&quot;Jane&quot; type=&quot;checkbox&quot; /&gt;
+&lt;label for=&quot;jane&quot;&gt;Jane&lt;/label&gt;
+&lt;input id=&quot;mary&quot; value=&quot;Mary&quot; type=&quot;checkbox&quot; /&gt;
+&lt;label for=&quot;mary&quot;&gt;Mary&lt;/label&gt;
+&lt;input id=&quot;grace&quot; value=&quot;Grace&quot; type=&quot;checkbox&quot; /&gt;
+&lt;label for=&quot;grace&quot;&gt;Grace&lt;/label&gt;
+&lt;br /&gt;
+&lt;label id=&quot;ckNames&quot;&gt;&lt;/label&gt;</pre>
+<p>We implement the container object with a special array binding (because the 
+properties don't exist in the class, I can't use the &quot;nameof&quot; kludge, so the 
+ID&quot;s are, sadly, string literals.)&nbsp; Of course, in the next example, I do 
+have properties for the checkboxes, but I still used the string literals!</p>
+<pre>class CheckboxListExample {
+  ckNames = IXBinder.AsArray(items =&gt; items.join(&quot;, &quot;))
+    .Add({ bindFrom: &quot;jane&quot;, attribute: &quot;value&quot; })
+    .Add({ bindFrom: &quot;mary&quot;, attribute: &quot;value&quot; })
+    .Add({ bindFrom: &quot;grace&quot;, attribute: &quot;value&quot; });
+}
+
+IX.CreateProxy(new CheckboxListExample());</pre>
+<p>And we get:</p>
+<p><img border="0" src="ixckarray.png" width="191" height="55"></p>
+<p>Notice that we did not initialize properties with the checkbox state!&nbsp; 
+If we do this:</p>
+<pre>class CheckboxListExample {
+  jane: boolean = false;
+  mary: boolean = false;
+  grace: boolean = false;
+  ckNames = IXBinder.AsArray(items =&gt; items.join(&quot;, &quot;))
+    .Add({ bindFrom: &quot;jane&quot;, attribute: &quot;value&quot; })
+    .Add({ bindFrom: &quot;mary&quot;, attribute: &quot;value&quot; })
+    .Add({ bindFrom: &quot;grace&quot;, attribute: &quot;value&quot; });
+}
+
+let ckListExample = IX.CreateProxy(new CheckboxListExample());</pre>
+<p>We can programmatically set the check state:</p>
+<pre>ckListExample.jane = true;
+ckListExample.mary = true;</pre>
+<p>and we see:</p>
+<p><img border="0" src="cklistprog.png" width="180" height="50"></p>
+<p>So one thing we note here is that the property referring to the HTML element 
+is associated <i>with the checked attribute of the element</i>.&nbsp; That is an 
+artifact of how IX is coded, and actually points out an interesting problem -- 
+the object property maps to only one attribute of the DOM element, and IX is 
+very opinionated as to what that DOM element should be, depending on what the 
+element is!</p>
+<h2>Radio Buttons</h2>
+<h3>The View Way</h3>
+<p>This example binds the value of the radio button to the span:</p>
+<pre>&lt;input type=&quot;radio&quot; id=&quot;one&quot; value=&quot;One&quot; v-model=&quot;picked&quot;&gt;
+&lt;label for=&quot;one&quot;&gt;One&lt;/label&gt;
+&lt;br&gt;
+&lt;input type=&quot;radio&quot; id=&quot;two&quot; value=&quot;Two&quot; v-model=&quot;picked&quot;&gt;
+&lt;label for=&quot;two&quot;&gt;Two&lt;/label&gt;
+&lt;br&gt;
+&lt;span&gt;Picked: {{ picked }}&lt;/span&gt;</pre>
+<h3>The IX Way</h3>
+<p>Given:</p>
+<pre>&lt;input id=&quot;marc&quot; value=&quot;Marc&quot; type=&quot;radio&quot; name=&quot;group1&quot; /&gt;
+&lt;label for=&quot;marc&quot;&gt;Marc&lt;/label&gt;
+&lt;input id=&quot;chris&quot; value=&quot;Chris&quot; type=&quot;radio&quot; name=&quot;group1&quot; /&gt;
+&lt;label for=&quot;chris&quot;&gt;Chris&lt;/label&gt;
+&lt;br /&gt;
+&lt;label id=&quot;rbPicked&quot;&gt;&lt;/label&gt;</pre>
+<p>We add two binders, whichever one is clicked becomes the one whose binder 
+event is fired.&nbsp; Again, note in this example I'm not using the &quot;nameof&quot; 
+syntax because in this case the property doesn't exist!</p>
+<pre>class RadioExample {
+  rbPicked = new IXBinder({ bindFrom: &quot;marc&quot;, attribute: &quot;value&quot; })
+    .Add({ bindFrom: &quot;chris&quot;, attribute: &quot;value&quot; });
+}
+
+IX.CreateProxy(new RadioExample());</pre>
+<p>thus updating to the current radio button:</p>
+<p><img border="0" src="rb1.png" width="132" height="48"></p>
+<p><img border="0" src="rb2.png" width="120" height="43"></p>
+<p>And if we want to programmatically set the radio button state, define the 
+properties:</p>
+<pre>class RadioExample {
+  marc: boolean = false;
+  chris: boolean = false;
+  rbPicked = new IXBinder({ bindFrom: &quot;marc&quot;, attribute: &quot;value&quot; })
+    .Add({ bindFrom: &quot;chris&quot;, attribute: &quot;value&quot; });
+}</pre>
+<p>and after proxy initialization, set the state:</p>
+<pre>let rbExample = IX.CreateProxy(new RadioExample());
+rbExample.chris = true;</pre>
+<p><img border="0" src="rb2.png" width="120" height="43"></p>
+<h2>ComboBoxes</h2>
+<h2>SVG Example</h2>
+<p>Vue has a fun SVG example that I thought would be a decent proof of concept 
+of doing something a bit more challenging than working with basic DOM elements.</p>
+<p><a href="https://vuejs.org/v2/examples/svg.html">
+https://vuejs.org/v2/examples/svg.html</a></p>
 <h2>Implementation Patterns</h2>
 <h2>Behind the Scenes</h2>
 <h3>TypeScript Does Not Mean Runtime Types</h3>
+<p>TypeScript is fantastic for ensuring type safety when <i>writing</i> code.&nbsp; 
+Unfortunately, by the time the code has been transpiled to JavasScript, all that 
+type information that the IDE is using is of course lost.&nbsp; This is 
+unfortunate because there are times in the code that I really wish I had type 
+information.</p>
+<p>&nbsp;</p>
 <h2>Integration Tests</h2>
 <p>We can easily test the behavior of IX by directly inspecting DOM elements 
-after model changes, and vice versa.</p>
+after model changes, and vice versa.&nbsp; And I prefer to use the phrase 
+&quot;integration test&quot; rather than &quot;unit test&quot; because we're not testing low level 
+functions in the IX library -- we are testing the integration of the DOM 
+elements with object properties.&nbsp; </p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>

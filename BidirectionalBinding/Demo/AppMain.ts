@@ -79,11 +79,35 @@ class OutputForm {
     sum: number;
 }
 
+//class CheckboxExample {
+//    checkbox: boolean = false;
+//    ckLabel: string = "Unchecked";
+
+//    onCheckboxClicked = new IXEvent().Add((_, p: CheckboxExample) => p.ckLabel = p.checkbox ? "Checked" : "Unchecked");
+//}
+
 class CheckboxExample {
     checkbox: boolean = false;
-    ckLabel: string = "Unchecked";
+    ckLabel = new IXBinder({ bindFrom: IX.nameof(() => this.checkbox) });
+    // or:
+    // ckLabel = new IXBinder({ bindFrom: "checkbox" });
+}
 
-    onCheckboxClicked = new IXEvent().Add((_, p: CheckboxExample) => p.ckLabel = p.checkbox ? "Checked" : "Unchecked");
+class CheckboxListExample {
+    jane: boolean = false;
+    mary: boolean = false;
+    grace: boolean = false;
+    ckNames = IXBinder.AsArray(items => items.join(", "))
+        .Add({ bindFrom: "jane", attribute: "value" })
+        .Add({ bindFrom: "mary", attribute: "value" })
+        .Add({ bindFrom: "grace", attribute: "value" });
+}
+
+class RadioExample {
+    marc: boolean = false;
+    chris: boolean = false;
+    rbPicked = new IXBinder({ bindFrom: "marc", attribute: "value" })
+        .Add({ bindFrom: "chris", attribute: "value" });
 }
 
 export class AppMain {
@@ -101,6 +125,13 @@ export class AppMain {
         IX.CreateProxy(new BidirectionalExample());
         IX.CreateProxy(new ReverseExample());
         IX.CreateProxy(new CheckboxExample());
+
+        let rbExample = IX.CreateProxy(new RadioExample());
+        rbExample.chris = true;
+
+        let ckListExample = IX.CreateProxy(new CheckboxListExample());
+        ckListExample.jane = true;
+        ckListExample.mary = true;
 
         let hform = IX.CreateProxy(new HoverExample());
         hform

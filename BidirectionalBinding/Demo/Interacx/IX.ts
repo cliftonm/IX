@@ -2,6 +2,7 @@
 import { IXAttributeProxy } from "./IXAttributeProxy"
 import { IXClassListProxy } from "./IXClassListProxy"
 import { IXBind } from "./IXBinder"
+import { IXBinder } from "./IXBinder"
 import { IXEvent } from "./IXEvent"
 
 export class IX {
@@ -27,11 +28,25 @@ export class IX {
                         break;
 
                     case "INPUT":
-                        let oldValue = (el as HTMLInputElement).value;
+                        let typeAttr = el.getAttribute("type");
+                        // Limited support at the moment.
+                        if (typeAttr == "checkbox" || typeAttr == "radio") {
 
-                        if (oldValue != val) {
-                            (el as HTMLInputElement).value = val;
-                            el.dispatchEvent(new Event('changed'));
+                            let oldValue = (el as HTMLInputElement).checked;
+
+                            if (oldValue != val) {
+                                console.log(`INPUT => old value: "${oldValue}" new value: "${val}"`);
+                                (el as HTMLInputElement).checked = val;
+                                el.dispatchEvent(new Event('click'));
+                            }
+                        } else {
+                            let oldValue = (el as HTMLInputElement).value;
+
+                            if (oldValue != val) {
+                                console.log(`INPUT => old value: "${oldValue}" new value: "${val}"`);
+                                (el as HTMLInputElement).value = val;
+                                el.dispatchEvent(new Event('changed'));
+                            }
                         }
 
                         break;
@@ -138,33 +153,74 @@ export class IX {
     }
 */
 
+    // We assume binders are created on input elements.  Probably not a great assumption.
     private static CreateBinders<T>(container: T, proxy: T): void {
         Object.keys(container).forEach(k => {
 
             if (container[k].binders?.length ?? 0 > 0) {
-                let binders = container[k].binders as IXBind[];
+                let binderContainer = container[k] as IXBinder;
+                let binders = binderContainer.binders as IXBind[];
 
-                binders.forEach(b => {
-                    let elName = b.bindFrom;
-                    let el = document.getElementById(elName);
-                    console.log(`Binding receiver ${k} to sender ${elName}`);
+                if (binderContainer.asArray) {
+                    binders.forEach(b => {
+                        let elName = b.bindFrom;
+                        let el = document.getElementById(elName);
 
-                    // Realtime
-                    el.addEventListener("keyup", ev => {
-                        let v = (ev.currentTarget as HTMLInputElement).value;
-                        // proxy[elName] = v;    --- why?
-                        v = b.op === undefined ? v : b.op(v);
-                        proxy[k] = v;
+                        let typeAttr = el.getAttribute("type");
+
+                        // Limited support at the moment.
+                        if (typeAttr == "checkbox" || typeAttr == "radio") {
+                            el.addEventListener("click", ev => {
+                                let values: string[] = [];
+
+                                // Get all the items currently checked
+                                binders.forEach(binderItem => {
+                                    let boundElement = (document.getElementById(binderItem.bindFrom) as HTMLInputElement);
+                                    let checked = boundElement.checked;
+
+                                    if (checked) {
+                                        values.push(boundElement[binderItem.attribute]);
+                                    }
+                                });
+
+                                let ret = binderContainer.arrayOp(values);
+                                proxy[k] = ret;
+                            });
+                        }
                     });
+                } else {
+                    binders.forEach(b => {
+                        let elName = b.bindFrom;
+                        let el = document.getElementById(elName);
+                        console.log(`Binding receiver ${k} to sender ${elName}`);
 
-                    // Lost focus, or called when value is set programmatically in the proxy setter.
-                    el.addEventListener("changed", ev => {
-                        let v = (ev.currentTarget as HTMLInputElement).value;
-                        // proxy[elName] = v;    --- why?
-                        v = b.op === undefined ? v : b.op(v);
-                        proxy[k] = v;
+                        let typeAttr = el.getAttribute("type");
+
+                        if (typeAttr == "checkbox" || typeAttr == "radio") {
+                            el.addEventListener("click", ev => {
+                                let boundAttr = b.attribute ?? "checked";
+                                let v = String((ev.currentTarget as HTMLInputElement)[boundAttr]);
+                                v = b.op === undefined ? v : b.op(v);
+                                proxy[k] = v;
+                            });
+                        } else {
+                            // Realtime typing
+                            el.addEventListener("keyup", ev => {
+                                let v = (ev.currentTarget as HTMLInputElement).value;
+                                // proxy[elName] = v;    --- why?
+                                v = b.op === undefined ? v : b.op(v);
+                                proxy[k] = v;
+                            });
+
+                            // Lost focus, or called when value is set programmatically in the proxy setter.
+                            el.addEventListener("changed", ev => {
+                                let v = (ev.currentTarget as HTMLInputElement).value;
+                                v = b.op === undefined ? v : b.op(v);
+                                proxy[k] = v;
+                            });
+                        }
                     });
-                })
+                }
             }
         });
     }
