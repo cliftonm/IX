@@ -12,6 +12,7 @@
 import { IX } from "Interacx/IX"
 import { IXBinder } from "./Interacx/IXBinder"
 import { IXEvent } from "./Interacx/IXEvent"
+import { IXSelector } from "./Interacx/IXSelector"
 
 class InputForm {
     firstName: string = "";
@@ -110,6 +111,30 @@ class RadioExample {
         .Add({ bindFrom: "chris", attribute: "value" });
 }
 
+class ComboboxExample {
+    selector = new IXSelector();
+
+    //selector = new IXSelector().Add({ disabled: true, text: "Please select one" })
+    //    .Add({ value: 1, text: "A" })
+    //    .Add({ value: 2, text: "B" })
+    //    .Add({ value: 3, text: "C" });
+
+    selection: string = "";
+
+    onSelectorChanged = new IXEvent().Add((_, p) => p.selection = `Selected: ${p.selector.text} with value ${p.selector.value}`);
+}
+
+class ComboboxInitializationExample {
+    selector2 = new IXSelector().Add({ selected:true, disabled: true, text: "Please select one" })
+        .Add({ value: 12, text: "AAA" })
+        .Add({ value: 23, text: "BBB" })
+        .Add({ value: 34, text: "CCC" });
+
+    selection2: string = "";
+
+    onSelector2Changed = new IXEvent().Add((_, p) => p.selection2 = `Selected: ${p.selector2.text} with value ${p.selector2.value}`);
+}
+
 export class AppMain {
     public AlertChangedValue(obj, oldVal, newVal) {
         alert(`was: ${oldVal} new: ${newVal} - ${obj.firstName}`);
@@ -132,6 +157,10 @@ export class AppMain {
         let ckListExample = IX.CreateProxy(new CheckboxListExample());
         ckListExample.jane = true;
         ckListExample.mary = true;
+
+        IX.CreateProxy(new ComboboxExample());
+        let cb = IX.CreateProxy(new ComboboxInitializationExample());
+        cb.selector2.value = 34;
 
         let hform = IX.CreateProxy(new HoverExample());
         hform

@@ -1,4 +1,5 @@
-﻿import { IXTemplate } from "./IXTemplate"
+﻿import { IXOption } from "./IXSelector"
+import { IXTemplate } from "./IXTemplate"
 
 export class IXArrayProxy {
     static Create(id: string, container: any): any {
@@ -60,6 +61,7 @@ export class IXArrayProxy {
                 if (!isNaN(prop)) {
                     let el = document.getElementById(id);
                     switch (el.nodeName) {
+                        // TODO: "UL"!
                         case "OL":
                             let n = Number(prop);
                             let ol = el as HTMLOListElement;
@@ -88,16 +90,36 @@ export class IXArrayProxy {
                             }
 
                             break;
+
+                        case "SELECT":
+                            break;
                     }
                 } else if (val.constructor.name == "Array") {
                     let el = document.getElementById(id);
 
-                    // remove all child LI elements.
-                    (val as []).forEach(v => {
-                        let li = document.createElement("li") as HTMLLIElement;
-                        li.innerText = v;
-                        (el as HTMLOListElement).append(li);
-                    });
+                    // TODO: remove all child elements?
+
+                    switch (el.nodeName) {
+                        case "SELECT":
+                            (val as IXOption[]).forEach(v => {
+                                let opt = document.createElement("option") as HTMLOptionElement;
+                                opt.innerText = v.text;
+                                opt.value = String(v.value);
+                                opt.disabled = v.disabled;
+                                opt.selected = v.selected;
+                                (el as HTMLSelectElement).append(opt);
+                            });
+                            break;
+
+                        case "OL":
+                        case "UL":
+                            (val as []).forEach(v => {
+                                let li = document.createElement("li") as HTMLLIElement;
+                                li.innerText = v;
+                                (el as HTMLOListElement).append(li);
+                            });
+                            break;
+                    }
                 }
             }
 

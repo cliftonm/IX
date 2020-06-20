@@ -13,7 +13,7 @@
 
     static AttributeChangeHandler = {
         get: function (obj, prop, receiver) {
-            // return true for this special property, so we know that we're dealing with a ProxyArray object.
+            // return true for this special property, so we know that we're dealing with a ProxyAttribute object.
             if (prop == "_isProxy") {
                 return true;
             }
@@ -38,7 +38,6 @@
             }
 
             return val;
-
         },
 
         set: function (obj, prop, val, receiver) {

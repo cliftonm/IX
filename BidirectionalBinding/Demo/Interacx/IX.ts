@@ -1,11 +1,15 @@
 ﻿import { IXArrayProxy } from "./IXArrayProxy"
 import { IXAttributeProxy } from "./IXAttributeProxy"
-import { IXClassListProxy } from "./IXClassListProxy"
 import { IXBind } from "./IXBinder"
 import { IXBinder } from "./IXBinder"
+import { IXClassListProxy } from "./IXClassListProxy"
 import { IXEvent } from "./IXEvent"
+import { IXPropertyProxy } from "./IXPropertyProxy"
+import { IXSelector } from "./IXSelector"
+
 
 export class IX {
+    // TODO: We might want to break apart the uiHandler to specific getter/setters based on the UI element to get rid of the switch statement.
     private static uiHandler = {
         get: (obj, prop) => {
             console.log(`GET: ${prop}`);
@@ -24,6 +28,7 @@ export class IX {
                     case "DIV":
                     case "P":
                     case "LABEL":
+                    case "SPAN":
                         (el as HTMLElement).innerHTML = val;
                         break;
 
@@ -63,6 +68,12 @@ export class IX {
 
                             (val as []).forEach(v => obj[prop].push(v));
                         }
+
+                        break;
+
+                    // debugging, to see if this ever happens.
+                    case "SELECT":
+                        console.log("set SELECT!");
 
                         break;
                 }
@@ -109,6 +120,7 @@ export class IX {
                 case "Boolean":
                 case "BigInt":
                     proxy[k] = container[k];        // Force the proxy to handle the initial value.
+
                     break;
 
                 case "Array":
@@ -125,6 +137,37 @@ export class IX {
                         newProxy[k] = container[k];
                         container[k] = newProxy;
                     }
+
+                    // We might want this to work a bit smarter, like the IXSelector next.
+
+                    break;
+
+                case "IXSelector":
+                    // Similar to "Array" above, except we are proxying the IXSelector.options array, not the container itself.
+                    if (container[k]._id != k) {
+                        let selector = container[k] as IXSelector;
+
+                        // Proxy the options array so we can initialize it as well as push/pop.
+                        if (selector.options.length > 0) {
+                            let newProxy = IXArrayProxy.Create(k, container);
+                            newProxy[k] = selector.options;
+                            selector.options = newProxy;
+                        }
+
+                        // However, here we have a special case, as we want to also proxy the IXSelector.text and IXSelector.value properties, so
+                        // we can select the item in the options array when these are set.
+
+                        let valueProxy = IXPropertyProxy.Create(k, "value", selector);
+                        let textProxy = IXPropertyProxy.Create(k, "text", selector);
+
+                        //valueProxy[k] = selector.value;
+                        //textProxy[k] = selector.text;
+
+                        // Use container[k], as it is "any", whereas selector.value is string | number and selector.text is string.
+                        container[k].value = valueProxy;
+                        container[k].text = textProxy;
+                    }
+
                     break;
             }
         });
@@ -262,14 +305,13 @@ export class IX {
                 }
 
                 // Change event is always wired up so we set the container's value when the UI element value changes.
-                // if (container[changedEvent]) {
-                    switch (el.nodeName) {
-                        case "INPUT":
-                            // TODO: If this is a button type, then what?
-                            IX.WireUpEventHandler(el, container, proxy, "value", "change", changedEvent);
-                            break;
-                    }
-                // }
+                switch (el.nodeName) {
+                    case "SELECT":
+                    case "INPUT":
+                        // TODO: If this is a button type, then what?
+                        IX.WireUpEventHandler(el, container, proxy, "value", "change", changedEvent);
+                        break;
+                }
 
                 if (container[keyUpEvent]) {
                     switch (el.nodeName) {
@@ -327,20 +369,32 @@ export class IX {
             let oldVal = undefined;
             let newVal = undefined;
             let propName = undefined;
-
-            // buttons are click events, not change properties.
-            if (propertyName) {
-                oldVal = container[el.id];
-                newVal = el[propertyName];
-                propName = el.id;
-            }
-
-            let ucPropName = IX.UpperCaseFirstChar(propName ?? "");
             let handler = container[handlerName];
 
-            if (propertyName) {
-                newVal = IX.CustomConverter(proxy, ucPropName, newVal);
-                container[propName] = newVal;
+            switch (el.nodeName) {
+                case "SELECT":
+                    let elSelector = el as HTMLSelectElement;
+                    let selector = container[el.id] as IXSelector;
+                    selector.value = elSelector.value;
+                    selector.text = elSelector.options[elSelector.selectedIndex].text;
+                    break;
+
+                default:
+                    // buttons are click events, not change properties.
+                    if (propertyName) {
+                        oldVal = container[el.id];
+                        newVal = el[propertyName];
+                        propName = el.id;
+                    }
+
+                    let ucPropName = IX.UpperCaseFirstChar(propName ?? "");
+
+                    if (propertyName) {
+                        newVal = IX.CustomConverter(proxy, ucPropName, newVal);
+                        container[propName] = newVal;
+                    }
+
+                    break;
             }
 
             if (handler) {

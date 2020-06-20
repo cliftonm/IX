@@ -572,11 +572,65 @@ properties:</p>
 rbExample.chris = true;</pre>
 <p><img border="0" src="rb2.png" width="120" height="43"></p>
 <h2>ComboBoxes</h2>
-<h2>SVG Example</h2>
-<p>Vue has a fun SVG example that I thought would be a decent proof of concept 
-of doing something a bit more challenging than working with basic DOM elements.</p>
-<p><a href="https://vuejs.org/v2/examples/svg.html">
-https://vuejs.org/v2/examples/svg.html</a></p>
+<h3>The Vue Way</h3>
+<pre>&lt;select v-model=&quot;selected&quot;&gt;
+  &lt;option disabled value=&quot;&quot;&gt;Please select one&lt;/option&gt;
+  &lt;option&gt;A&lt;/option&gt;
+  &lt;option&gt;B&lt;/option&gt;
+  &lt;option&gt;C&lt;/option&gt;
+&lt;/select&gt;
+&lt;span&gt;Selected: {{ selected }}&lt;/span&gt;</pre>
+<h3>The IX Way</h3>
+<p>Given:</p>
+<pre>&lt;select id=&quot;selector&quot;&gt;
+  &lt;option selected disabled&gt;Please select one&lt;/option&gt;
+  &lt;option value=&quot;1&quot;&gt;A&lt;/option&gt;
+  &lt;option value=&quot;2&quot;&gt;B&lt;/option&gt;
+  &lt;option value=&quot;3&quot;&gt;C&lt;/option&gt;
+&lt;/select&gt;
+&lt;br /&gt;
+&lt;span id=&quot;selection&quot;&gt;&lt;/span&gt;</pre>
+<p>and the container class:</p>
+<pre>class ComboboxExample {
+  selector = new IXSelector();
+  selection: string = &quot;&quot;;
+
+  onSelectorChanged = 
+    new IXEvent().Add((_, p) =&gt; 
+      p.selection = `Selected: ${p.selector.text} with value ${p.selector.value}`);
+}
+
+IX.CreateProxy(new ComboboxExample());</pre>
+<p>We then see:</p>
+<p><img border="0" src="select1.png" width="129" height="28"></p>
+<p>and after selection:</p>
+<p><img border="0" src="select2.png" width="156" height="45"></p>
+<p>Note that the selector property, implemented as an <code>IXSelector</code>, contains two 
+properties, <code>text</code> and <code>value</code>, for the selected item.</p>
+<p>We can also initialize the options programmatically.&nbsp; Given:</p>
+<pre>&lt;select id=&quot;selector2&quot;&gt;&lt;/select&gt;
+&lt;br /&gt;
+&lt;span id=&quot;selection2&quot;&gt;&lt;/span&gt;</pre>
+<p>and:</p>
+<pre>class ComboboxInitializationExample {
+  selector2 = new IXSelector().Add({ selected:true, disabled: true, text: &quot;Please select one&quot; })
+    .Add({ value: 12, text: &quot;AAA&quot; })
+    .Add({ value: 23, text: &quot;BBB&quot; })
+    .Add({ value: 34, text: &quot;CCC&quot; });
+
+  selection2: string = &quot;&quot;;
+
+  onSelector2Changed = new IXEvent().Add((_, p) =&gt; p.selection2 = `Selected: ${p.selector2.text} with value ${p.selector2.value}`);
+}
+
+ let cb = IX.CreateProxy(new ComboboxInitializationExample());</pre>
+<p>We see:</p>
+<p><img border="0" src="select3.png" width="184" height="42"></p>
+<p>And programmatically set the selection:</p>
+<pre>cb.selector2.value = 34;</pre>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <h2>Implementation Patterns</h2>
 <h2>Behind the Scenes</h2>
 <h3>TypeScript Does Not Mean Runtime Types</h3>
@@ -600,6 +654,12 @@ elements with object properties.&nbsp; </p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
+
+<h2>SVG Example</h2>
+<p>Vue has a fun SVG example that I thought would be a decent proof of concept 
+of doing something a bit more challenging than working with basic DOM elements.</p>
+<p><a href="https://vuejs.org/v2/examples/svg.html">
+https://vuejs.org/v2/examples/svg.html</a></p>
 
 </body>
 
