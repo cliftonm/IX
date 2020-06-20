@@ -79,6 +79,13 @@ class OutputForm {
     sum: number;
 }
 
+class CheckboxExample {
+    checkbox: boolean = false;
+    ckLabel: string = "Unchecked";
+
+    onCheckboxClicked = new IXEvent().Add((_, p: CheckboxExample) => p.ckLabel = p.checkbox ? "Checked" : "Unchecked");
+}
+
 export class AppMain {
     public AlertChangedValue(obj, oldVal, newVal) {
         alert(`was: ${oldVal} new: ${newVal} - ${obj.firstName}`);
@@ -93,6 +100,7 @@ export class AppMain {
 
         IX.CreateProxy(new BidirectionalExample());
         IX.CreateProxy(new ReverseExample());
+        IX.CreateProxy(new CheckboxExample());
 
         let hform = IX.CreateProxy(new HoverExample());
         hform

@@ -234,21 +234,31 @@ export class IX {
                 let el = document.getElementById(elName);
                 let anonEl = el as any;
 
-                if (el && !anonEl._proxy) {
-                    anonEl._proxy = this;
+                if (el) {
+                    if (!anonEl._proxy) {
+                        anonEl._proxy = this;
+                    }
 
-                    switch (el.nodeName) {
-                        case "BUTTON":
-                            IX.WireUpEventHandler(el, container, proxy, null, "click", k);
-                            break;
+                    if (!anonEl._clickEventWiredUp) {
+                        anonEl._clickEventWiredUp = true;
 
-                        case "INPUT":
-                            // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
-                            if (el.getAttribute("type") == "button") {
+                        switch (el.nodeName) {
+                            case "BUTTON":
                                 IX.WireUpEventHandler(el, container, proxy, null, "click", k);
-                            }
+                                break;
 
-                            break;
+                            case "INPUT":
+                                // sort of not necessary to test type but a good idea, especially for checkboxes and radio buttons.
+                                let typeAttr = el.getAttribute("type");
+
+                                if (typeAttr == "checkbox" || typeAttr == "radio") {
+                                    IX.WireUpEventHandler(el, container, proxy, "checked", "click", k);
+                                } else {
+                                    IX.WireUpEventHandler(el, container, proxy, null, "click", k);
+                                }
+
+                                break;
+                        }
                     }
                 }
             }

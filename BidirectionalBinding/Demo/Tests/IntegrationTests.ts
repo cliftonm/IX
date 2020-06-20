@@ -38,6 +38,20 @@ export class IntegrationTests {
                 dom: "<button id='button'></button>"
             },
             {
+                testFnc: IntegrationTests.OnlyOneClickEventTest,
+                obj: { clicked: 0, onButtonClicked: new IXEvent().Add((_, p) => p.clicked += 1) },
+                dom: "<button id='button'></button>"
+            },
+            {
+                testFnc: IntegrationTests.CheckboxClickTest,
+                obj: {
+                    clicked: false, checkbox: false, onCheckboxClicked: new IXEvent().Add((_, p) => {
+                        p.clicked = p.checkbox;
+                    })
+                },
+                dom: "<input id='checkbox' type='checkbox'/>"
+            },
+            {
                 testFnc: IntegrationTests.ConvertTest,
                 obj: { inputTest: "", onConvertInputTest: s => `${s} Converted!` },
                 dom: "<input id='inputTest'/>"
@@ -179,6 +193,24 @@ export class IntegrationTests {
         let test = IX.CreateProxy(obj);
         let el = document.getElementById("button") as HTMLButtonElement;
         el.dispatchEvent(new Event('click')); 
+        IXAssert.Equal(test.clicked, true);
+    }
+
+    static OnlyOneClickEventTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        IX.UpdateProxy(test);
+        let el = document.getElementById("button") as HTMLButtonElement;
+        el.dispatchEvent(new Event('click'));
+        IXAssert.Equal(test.clicked, 1);
+    }
+
+    static CheckboxClickTest(obj): void {
+        let test = IX.CreateProxy(obj);
+        let el = document.getElementById("checkbox") as HTMLButtonElement;
+        el["checked"] = true;          // Annoyingly, we have to set the state and fire the event!
+        el.dispatchEvent(new Event('click'));
+        // This verifies that when the checkbox is clicked, the "checkbox" property is updated with its new state, which should be "true",
+        // by setting the clicked property to the checkbox state property.
         IXAssert.Equal(test.clicked, true);
     }
 
