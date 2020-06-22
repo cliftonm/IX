@@ -161,6 +161,12 @@ export class AppMain {
         IX.CreateProxy(new ComboboxExample());
         let cb = IX.CreateProxy(new ComboboxInitializationExample());
         cb.selector2.value = 34;
+        cb.selector2.text = "AAA";
+
+        cb.selector2.options[2] = { text: "bbb", value: 999 };
+        // cb.selector2.options.pop();
+
+        // cb.selector2.options.push({ text: "DDD", value: 45 });
 
         let hform = IX.CreateProxy(new HoverExample());
         hform

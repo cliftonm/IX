@@ -4,7 +4,7 @@ import { IXBind } from "./IXBinder"
 import { IXBinder } from "./IXBinder"
 import { IXClassListProxy } from "./IXClassListProxy"
 import { IXEvent } from "./IXEvent"
-import { IXPropertyProxy } from "./IXPropertyProxy"
+import { IXSelectorProxy } from "./IXSelectorProxy"
 import { IXSelector } from "./IXSelector"
 
 
@@ -138,13 +138,13 @@ export class IX {
                         container[k] = newProxy;
                     }
 
-                    // We might want this to work a bit smarter, like the IXSelector next.
-
                     break;
 
                 case "IXSelector":
                     // Similar to "Array" above, except we are proxying the IXSelector.options array, not the container itself.
                     if (container[k]._id != k) {
+                        // Set the element that this IXSelector manages so we know what to do when value and text are assigned.
+                        container[k]._element = document.getElementById(k);
                         let selector = container[k] as IXSelector;
 
                         // Proxy the options array so we can initialize it as well as push/pop.
@@ -153,19 +153,6 @@ export class IX {
                             newProxy[k] = selector.options;
                             selector.options = newProxy;
                         }
-
-                        // However, here we have a special case, as we want to also proxy the IXSelector.text and IXSelector.value properties, so
-                        // we can select the item in the options array when these are set.
-
-                        let valueProxy = IXPropertyProxy.Create(k, "value", selector);
-                        let textProxy = IXPropertyProxy.Create(k, "text", selector);
-
-                        //valueProxy[k] = selector.value;
-                        //textProxy[k] = selector.text;
-
-                        // Use container[k], as it is "any", whereas selector.value is string | number and selector.text is string.
-                        container[k].value = valueProxy;
-                        container[k].text = textProxy;
                     }
 
                     break;

@@ -62,7 +62,7 @@ export class IXArrayProxy {
                     let el = document.getElementById(id);
                     switch (el.nodeName) {
                         // TODO: "UL"!
-                        case "OL":
+                        case "OL": {
                             let n = Number(prop);
                             let ol = el as HTMLOListElement;
 
@@ -90,9 +90,29 @@ export class IXArrayProxy {
                             }
 
                             break;
+                        }
 
-                        case "SELECT":
+                        case "SELECT": {
+                            let n = Number(prop);
+                            let sel = el as HTMLSelectElement;
+
+                            if (n < sel.childNodes.length && !receiver._push) {
+                                // We are replacing a node
+                                // innerText or innerHTML?
+                                let opt = sel.childNodes[n] as HTMLOptionElement;
+                                opt.value = val.value;
+                                opt.text = val.text;
+                            } else {
+                                let opt = document.createElement("option") as HTMLOptionElement;
+                                opt.value = val.value;
+                                opt.text = val.text;
+                                sel.append(opt);
+                                obj[id].push(val);
+                                receiver._push = false;
+                            }
+
                             break;
+                        }
                     }
                 } else if (val.constructor.name == "Array") {
                     let el = document.getElementById(id);
