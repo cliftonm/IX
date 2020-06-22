@@ -4,7 +4,6 @@ import { IXBind } from "./IXBinder"
 import { IXBinder } from "./IXBinder"
 import { IXClassListProxy } from "./IXClassListProxy"
 import { IXEvent } from "./IXEvent"
-import { IXSelectorProxy } from "./IXSelectorProxy"
 import { IXSelector } from "./IXSelector"
 
 

@@ -16,6 +16,7 @@ import { IXSelector } from "./Interacx/IXSelector"
 
 class InputForm {
     firstName: string = "";
+
     lastName: string = "";
 
     // Late binding with UpdateProxy after first time initialization.
@@ -27,7 +28,10 @@ class InputForm {
 
     // Event handlers:
     onFirstNameKeyUp = new IXEvent();
+    onConvertFirstName = s => s.toUpperCase();
+
     onLastNameChanged = new IXEvent();
+
     onXChanged = new IXEvent();
     onYChanged = new IXEvent();
 
@@ -135,12 +139,21 @@ class ComboboxInitializationExample {
     onSelector2Changed = new IXEvent().Add((_, p) => p.selection2 = `Selected: ${p.selector2.text} with value ${p.selector2.value}`);
 }
 
+class SomeClass { }
+
 export class AppMain {
     public AlertChangedValue(obj, oldVal, newVal) {
         alert(`was: ${oldVal} new: ${newVal} - ${obj.firstName}`);
     }
 
     public run() {
+        let a = 1;
+        let b = "foo";
+        let c = true;
+        let d = [];
+        let e = new SomeClass();
+        [a, b, c, d, e].forEach(q => console.log(q.constructor.name));
+
         let listForm = IX.CreateProxy(new ListExample());
         // listForm.someList[1] = "Learn IX!";
         // let listForm = IX.CreateProxy(new ListExample());

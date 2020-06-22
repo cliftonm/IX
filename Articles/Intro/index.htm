@@ -82,7 +82,17 @@ major website&quot;, except perhaps for me!</p>
 	<li>It's quite interesting to learn about proxies.</li>
 <li>This was fun!</li>
 </ol>
-<p>So without further ado, let's start exploring!</p>
+	<h3>This is a Prototype / Proof of Concept!</h3>
+<p>Keep in mind that this is a prototype - it is a proof of concept of working 
+with the Javascript <code>Proxy</code> class and dealing with some complexities, such as 
+arrays.&nbsp; After having written the code here, I can see some improvements to 
+the implementation, and there are of course many event wire-ups not implemented, 
+and I have yet to explore using this with third party UI component libraries.&nbsp; 
+None-the-less, it is a usable prototype for basic operations.</p>
+<h3>Extending the Library</h3>
+<p>If you want to extend this library, please make pull requests to the GitHub 
+repo: <a href="https://github.com/cliftonm/IX">https://github.com/cliftonm/IX</a> 
+or email me and request to be a collaborator.</p>
 <h2>Simple Data Binding of Inner HTML</h2>
 <p>Let's start with simple data binding of the inner HTML associated with a <code>DIV</code>.</p>
 <h3>The Vue Way</h3>
@@ -642,21 +652,71 @@ properties, <code>text</code> and <code>value</code>, for the selected item.</p>
 <pre>cb.selector2.options[2] = { text: &quot;bbb&quot;, value: 999 };</pre>
 <p><img border="0" src="selector8.png" width="124" height="154"></p>
 <h2>Implementation Patterns</h2>
-<h2>Behind the Scenes</h2>
-<h3>TypeScript Does Not Mean Runtime Types</h3>
-<p>TypeScript is fantastic for ensuring type safety when <i>writing</i> code.&nbsp; 
-Unfortunately, by the time the code has been transpiled to JavasScript, all that 
-type information that the IDE is using is of course lost.&nbsp; This is 
-unfortunate because there are times in the code that I really wish I had type 
-information.</p>
-<p>&nbsp;</p>
+<p>IX requires that class properties match the DOM element ID and that event 
+handlers have specific signatures.</p>
+<h3>ID and Class Property Name</h3>
+<p><img border="0" src="idprop1.png" width="405" height="115"></p>
+<h3>KeyUp, Changed, and Convert Events</h3>
+<p><img border="0" src="idprop2.png" width="368" height="152"></p>
+<p>Notice:</p>
+<p>The event name uses the property name with the first letter capitalized, 
+	so <code>firstName</code> becomes <code>FirstName</code>.</p>
+<h3>Supported Events</h3>
+<h4>KeyUp</h4>
+<p>on[Prop]KeyUp - realtime key up events.</p>
+<h4>Changed</h4>
+<p>on[Prop]Changed - element loses focus.</p>
+<p>This event applies to text, radio and checkbox inputs and &quot;select&quot; (combobox) 
+elements.</p>
+<h4>Convert</h4>
+<p>onConvert[Prop] - if defined, executes the function before the KeyUp and 
+Changed events fire.</p>
+<h4>Hover</h4>
+<p>on[Prop]Hover - if defined and the property has the signature:</p>
+<pre>{
+  attr: { title: &quot;&quot; }
+};</pre>
+<p>This will set the element's title on mouse hover.</p>
 <h2>Integration Tests</h2>
 <p>We can easily test the behavior of IX by directly inspecting DOM elements 
 after model changes, and vice versa.&nbsp; And I prefer to use the phrase 
 &quot;integration test&quot; rather than &quot;unit test&quot; because we're not testing low level 
 functions in the IX library -- we are testing the integration of the DOM 
 elements with object properties.&nbsp; </p>
-<p>&nbsp;</p>
+<h2>Behind the Scenes</h2>
+<h3>TypeScript Does Not Mean Runtime Type Reflection</h3>
+<p>TypeScript is fantastic for ensuring type safety when <i>writing</i> code.&nbsp; 
+However, by the time the code has been transpiled to JavasScript, all that type 
+information that the IDE is using is of course lost.&nbsp; This is unfortunate 
+because there are times in the code that I really wish I had type information.&nbsp; 
+There are some workarounds, such as for native types and classes:</p>
+<pre>let a = 1;
+let b = &quot;foo&quot;;
+let c = true;
+let d = [];
+let e = new SomeClass();
+[a, b, c, d, e].forEach(q =&gt; console.log(q.constructor.name));
+
+let listForm = IX.CreateProxy(new ListExample());</pre>
+<p>You get:</p>
+<p><img border="0" src="objects2.png" width="80" height="78"></p>
+<p>This is useful.&nbsp; However, given this class:</p>
+<pre>class SomeClass {
+  a: number;
+  b: string;
+}</pre>
+<p>What that gets transpiled to is simply an empty object <code>{}</code>.&nbsp; 
+So, <code>Object.keys(new SomeClass())</code> return an empty array <code>[]</code>.&nbsp; 
+To determine properties of the class, the properties must be initialized, and 
+they can even be initialized to null or undefined:</p>
+<pre>class SomeClass {
+  a: number = null;
+  b: string = undefined;
+}</pre>
+<p><img border="0" src="objects1.png" width="455" height="69"></p>
+<p>Hence the constraint in IX that you must initialize properties, otherwise the 
+wire-up cannot be made between the class property and the element with the ID of 
+the property name.</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
