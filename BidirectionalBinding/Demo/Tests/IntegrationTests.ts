@@ -24,6 +24,7 @@ export class IntegrationTests {
         // The "class" (i.e. container) for binding, events, etc.
         // The HTML needed to perform the test.
         let tests = [
+            // { testFnc: IntegrationTests.ShouldFail },
             { testFnc: IntegrationTests.InputElementSetOnInitializationTest, obj: { inputTest: "Test" }, dom: "<input id='inputTest'/>" },
             { testFnc: IntegrationTests.InputElementSetOnAssignmentTest, obj: { inputTest: "" }, dom: "<input id='inputTest'/>" },
             { testFnc: IntegrationTests.InputSetsPropertyTest, obj: { inputTest: "" }, dom: "<input id='inputTest'/>" },
@@ -99,7 +100,7 @@ export class IntegrationTests {
     }
 
     CreateTestDom(testForm: TestResults, testDom: string): void {
-        testForm.testDom = testDom;
+        testForm.testDom = testDom || "";
     }
 
     RemoveTestDom(testForm: TestResults, ): void {
@@ -118,6 +119,10 @@ export class IntegrationTests {
         }
 
         testProxy[id].classList.Add(passFail);
+    }
+
+    static ShouldFail(obj): void {
+        throw "Failed!!!";
     }
 
     // We don't use a proxies here to verify the test DOM state, as that would defeat the purpose of the test.

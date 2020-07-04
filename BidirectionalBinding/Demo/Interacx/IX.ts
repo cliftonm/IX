@@ -70,6 +70,22 @@ export class IX {
 
                         break;
 
+                    // Why didn't they have HTMLOListElement and HTMLUListElement derive from an HTMLListElement interface?
+                    case "UL":
+                        // We expect an array.
+                        if (val.constructor?.name == "Array") {
+                            // Remove the list elements as we're replacing them with a new array.
+                            let ul = el as HTMLUListElement;
+
+                            while (ul.firstChild) {
+                                ul.removeChild(ul.firstChild);
+                            }
+
+                            (val as []).forEach(v => obj[prop].push(v));
+                        }
+
+                        break;
+
                     // debugging, to see if this ever happens.
                     case "SELECT":
                         console.log("set SELECT!");

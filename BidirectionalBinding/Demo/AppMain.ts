@@ -141,12 +141,70 @@ class ComboboxInitializationExample {
 
 class SomeClass { }
 
+class NameContainer {
+    name: string;
+}
+
 export class AppMain {
     public AlertChangedValue(obj, oldVal, newVal) {
         alert(`was: ${oldVal} new: ${newVal} - ${obj.firstName}`);
     }
 
+    private myProxyHandler = {
+        get: (obj, prop) => {
+            console.log(`get ${prop}`);
+
+            return obj[prop];
+        },
+
+        set: (obj, prop, val) => {
+            console.log(`set ${prop} to ${val}`);
+            obj[prop] = val;
+
+            // Return true to accept change.
+            return true;
+        }
+    }
+
+    private valueProxy = {
+        get: (obj, prop) => {
+            console.log(`get ${prop}`);
+
+            let el = document.getElementById(prop) as HTMLInputElement;
+            let val = el.value;
+            obj[prop] = val;
+
+            return obj[prop];
+        },
+
+        set: (obj, prop, val) => {
+            console.log(`set ${prop} to ${val}`);
+
+            let el = document.getElementById(prop) as HTMLInputElement;
+            el.value = val;
+            obj[prop] = val;
+
+            // Return true to accept change.
+            return true;
+        }
+    }
+
     public run() {
+        let proxy = new Proxy({}, this.myProxyHandler);
+        proxy.foo = 1;
+        let foo = proxy.foo;
+        console.log(`foo = ${foo}`);
+
+        let nc = new Proxy(new NameContainer(), this.valueProxy);
+        nc.name = "Hello World!";
+
+        // Simulate the user having changed the input box:
+        let el = document.getElementById("name") as HTMLInputElement;
+        el.value = "fizbin";
+
+        let newName = nc.name;
+        console.log(`The new name is: ${newName}`);
+
         let a = 1;
         let b = "foo";
         let c = true;

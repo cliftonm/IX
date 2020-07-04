@@ -8,14 +8,124 @@
 
 <body>
 
-<p>Exploring Proxy to achieve TypeScript type safety with element binding, two way 
-data Binding, events, and more</p>
+<p>Exploring Proxy to Achieve TypeScript Type Safety with Element Binding, two way 
+Data Binding, Events, and More</p>
 <p>An Alice in Wonderland journey into the nuances of using Proxy with HTML and 
 TypeScript classes.</p>
 
-<!-- INSERT contents -->
+<h2>Contents</h2><ul>
+<li><a href="#Introduction0">Introduction</a></li>
+<ul>
+<li><a href="#Pros1">Pros</a></li>
+<li><a href="#Cons2">Cons</a></li>
+<li><a href="#SoWhyBother3">So Why Bother?</a></li>
+</ul>
+<li><a href="#WhatisaProxy4">What is a Proxy?</a></li>
+<ul>
+<li><a href="#ASimpleExample5">A Simple Example</a></li>
+<li><a href="#ADOMExample6">A DOM Example</a></li>
+<li><a href="#ThePointBeing...7">The Point Being...</a></li>
+</ul>
+<li><a href="#AboutTheCode8">About The Code</a></li>
+<li><a href="#SimpleDataBindingofInnerHTML9">Simple Data Binding of Inner HTML</a></li>
+<ul>
+<li><a href="#TheVueWay10">The Vue Way</a></li>
+<li><a href="#TheIXWay11">The IX Way</a></li>
+</ul>
+<li><a href="#ReactiveBehavior12">Reactive Behavior</a></li>
+<ul>
+<li><a href="#TheVueWay13">The Vue Way</a></li>
+<li><a href="#TheIXWay14">The IX Way</a></li>
+</ul>
+<li><a href="#Conditionals15">Conditionals</a></li>
+<ul>
+<li><a href="#TheVueWay16">The Vue Way</a></li>
+<li><a href="#TheIXWay17">The IX Way</a></li>
+</ul>
+<li><a href="#Loops18">Loops</a></li>
+<ul>
+<li><a href="#TheVueWay19">The Vue Way</a></li>
+<li><a href="#TheIXWay20">The IX Way</a></li>
+</ul>
+<li><a href="#ButtonClicks21">Button Clicks</a></li>
+<ul>
+<li><a href="#TheVueWay22">The Vue Way</a></li>
+<li><a href="#TheIXWay23">The IX Way</a></li>
+</ul>
+<li><a href="#DataConversion24">Data Conversion</a></li>
+<li><a href="#TwoWayBinding25">Two Way Binding</a></li>
+<ul>
+<li><a href="#TheVueWay26">The Vue Way</a></li>
+<li><a href="#TheIXWay27">The IX Way</a></li>
+</ul>
+<li><a href="#Checkboxes28">Checkboxes</a></li>
+<ul>
+<li><a href="#BindingCheckboxState29">Binding Checkbox State</a></li>
+<ul>
+<li><a href="#TheVueWay30">The Vue Way</a></li>
+<li><a href="#TheIXWay31">The IX Way</a></li>
+</ul>
+<li><a href="#BindingCheckboxValues32">Binding Checkbox Values</a></li>
+<ul>
+<li><a href="#TheViewWay33">The View Way</a></li>
+<li><a href="#TheIXWay34">The IX Way</a></li>
+</ul>
+</ul>
+<li><a href="#RadioButtons35">Radio Buttons</a></li>
+<ul>
+<li><a href="#TheViewWay36">The View Way</a></li>
+<li><a href="#TheIXWay37">The IX Way</a></li>
+</ul>
+<li><a href="#ComboBoxes38">ComboBoxes</a></li>
+<ul>
+<li><a href="#TheVueWay39">The Vue Way</a></li>
+<li><a href="#TheIXWay40">The IX Way</a></li>
+</ul>
+<li><a href="#ImplementationPatterns41">Implementation Patterns</a></li>
+<ul>
+<li><a href="#IDandClassPropertyName42">ID and Class Property Name</a></li>
+<li><a href="#KeyUp,Changed,andConvertEvents43">KeyUp, Changed, and Convert Events</a></li>
+<li><a href="#SupportedEvents44">Supported Events</a></li>
+<ul>
+<li><a href="#KeyUp45">KeyUp</a></li>
+<li><a href="#Changed46">Changed</a></li>
+<li><a href="#Convert47">Convert</a></li>
+<li><a href="#Hover48">Hover</a></li>
+</ul>
+</ul>
+<li><a href="#IntegrationTests49">Integration Tests</a></li>
+<ul>
+<li><a href="#TheTestRunner50">The Test Runner</a></li>
+<li><a href="#DefiningtheTests51">Defining the Tests</a></li>
+<li><a href="#TheIXAssertHelper52">The IXAssert Helper</a></li>
+<li><a href="#YouDon'tNeedTypeScriptClasses53">You Don't Need TypeScript Classes</a></li>
+</ul>
+<li><a href="#BehindtheScenes54">Behind the Scenes</a></li>
+<ul>
+<li><a href="#TypeScriptDoesNotMeanRuntimeTypeReflection55">TypeScript Does Not Mean Runtime Type Reflection</a></li>
+<li><a href="#ProxyInitialization56">Proxy Initialization</a></li>
+<ul>
+<li><a href="#CreatePropertyHandlers57">CreatePropertyHandlers</a></li>
+<li><a href="#WireUpEventHandler58">WireUpEventHandler</a></li>
+<li><a href="#CustomConverter59">CustomConverter</a></li>
+</ul>
+<li><a href="#CreateButtonHandlers60">CreateButtonHandlers</a></li>
+<li><a href="#CreateBinders61">CreateBinders</a></li>
+<li><a href="#Initialize62">Initialize</a></li>
+<li><a href="#Arrays63">Arrays</a></li>
+<li><a href="#IXEvent64">IXEvent</a></li>
+<li><a href="#IXTemplate65">IXTemplate</a></li>
+</ul>
+<li><a href="#Conclusion66">Conclusion</a></li>
+<ul>
+<li><a href="#DoIneedaProxy67">Do I need a Proxy?</a></li>
+<li><a href="#BothProxyandDOMWrapper68">Both Proxy and DOM Wrapper</a></li>
+<li><a href="#TheFutureIsEmerging69">The Future Is Emerging</a></li>
+</ul>
+</ul>
 
-<h2>Introduction</h2>
+
+<h2><a name="Introduction0">Introduction</a></h2>
 <p>I despise two things about front-end development:</p>
 <ol>
 	<li>Element ID's are string literals.</li>
@@ -40,11 +150,11 @@ actual &quot;edit-time&quot; types for type safety and Intellisense support - as
 strings referencing DOM elements by their ID's.&nbsp; Thus &quot;IX&quot; is born, which 
 is short for &quot;Interacx&quot;, which was a WinForm suite of tools that I created a 
 long time ago to automate data manipulation without using an ORM.&nbsp; I 
-decided to repurpose the name since WinForm applications are, well, passé, and 
+decided to repurpose the name since WinForm applications are, well, passï¿½, and 
 the reality is that the thing I despise, writing web apps, it where it's app, I 
 mean, at.&nbsp; And for your endless amusement, I decided to use some Vue examples as 
 comparison to the implementation I've developed here using proxies.</p>
-<h3>Pros</h3>
+<h3><a name="Pros1">Pros</a></h3>
 <p>Working with the code I've developed here, I find several advantages:</p>
 <ol>
 	<li>I'm not hardcoding DOM ID string literals.</li>
@@ -73,7 +183,7 @@ horrible, design.&nbsp; It's why I don't use Razor or similar rendering engines.
 I personally think that arcane custom tags in the HTML, &quot;if&quot; and &quot;loop&quot; 
 tags, etc., to control UI rendering is one of the worst ideas to come out of so-called 
 modern web development.</p>
-<h3>Cons</h3>
+<h3><a name="Cons2">Cons</a></h3>
 <p>So let's be realistic:</p>
 <ol>
 	<li>The syntax requires a specific mapping between the DOM element ID and 
@@ -92,20 +202,20 @@ modern web development.</p>
 </ol>
 <p>And I really doubt anyone is going to say, &quot;ooh, let's use IX to build a 
 major website&quot;, except perhaps for me!</p>
-<h3>So Why Bother?</h3>
+<h3><a name="SoWhyBother3">So Why Bother?</a></h3>
 <ol>
 	<li>I like to explore different ways to solve the warts of web development.</li>
 <li>I haven't come across anyone else attempting this.</li>
 	<li>It's quite interesting to learn about proxies.</li>
 <li>This was fun!</li>
 </ol>
-	<h2>What is a Proxy?</h2>
+	<h2><a name="WhatisaProxy4">What is a Proxy?</a></h2>
 <p>A <code>Proxy</code>, at least in Javascript, is an object that replaces your object and 
 lets you intercept the &quot;get&quot; and &quot;set&quot; methods.&nbsp; Read 
 more about the <code>Proxy</code> object
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">
 here</a>.&nbsp; </p>
-<h3>A Simple Example</h3>
+<h3><a name="ASimpleExample5">A Simple Example</a></h3>
 <p>I simple demonstration will suffice.&nbsp; First, a simple proxy 
 stub that just does the get/set operations with console logging:</p>
 <pre>private myProxyHandler = {
@@ -133,7 +243,7 @@ console.log(`foo = ${foo}`);</pre>
 get foo
 foo = 1</pre>
 <p>Ahh, feel the power!&nbsp; The world is now mine!</p>
-<h3>A DOM Example</h3>
+<h3><a name="ADOMExample6">A DOM Example</a></h3>
 <p>Now let's do something a little more interesting.&nbsp; We'll create a class 
 with a property whose name matches a DOM element.&nbsp; The DOM element, with a 
 label because input elements should have labels:</p>
@@ -204,7 +314,7 @@ get name
 The new name is: fizbin</pre>
 <p>It's important to note that <code>obj[prop] = val</code> makes the assignment on the non-proxy'd 
 object, therefore the proxy <i>setter</i> does not get called.</p>
-<h3>The Point Being...</h3>
+<h3><a name="ThePointBeing...7">The Point Being...</a></h3>
 <ol>
 	<li>I'm using types (and therefore Intellisense) to get/set the DOM element 
 	value.</li>
@@ -217,12 +327,14 @@ effort, infrastructure, time, and a lot of disasters along the way (a pause here
 to recognize the lives that have been lost in space exploration, as I don't want 
 to appear&nbsp; flippant about &quot;disasters.&quot;)</p>
 <p>So, let's start the journey down the slope of the U!</p>
-<h2>About The Code</h2>
+<h2><a name="AboutTheCode8">About The Code</a></h2>
 <p>The code is TypeScript with simple HTML and CSS, implemented in VS2017 
 solution.</p>
-<h2>Simple Data Binding of Inner HTML</h2>
+<p>The source code can also be found at:
+<a href="https://github.com/cliftonm/IX">https://github.com/cliftonm/IX</a></p>
+<h2><a name="SimpleDataBindingofInnerHTML9">Simple Data Binding of Inner HTML</a></h2>
 <p>Let's start with simple data binding of the inner HTML associated with a <code>DIV</code>.</p>
-<h3>The Vue Way</h3>
+<h3><a name="TheVueWay10">The Vue Way</a></h3>
 <pre>&lt;div id=&quot;app&quot;&gt;
   {{ message }}
 &lt;/div&gt;
@@ -239,17 +351,17 @@ var app = new Vue({
 	<li>The <code>#app</code>.</li>
 	<li>The whole <code>data</code> object thing.</li>
 </ol>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay11">The IX Way</a></h3>
 <pre>&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
 
 let form = IX.CreateNullProxy(); // No associated view model.
 form.app = &quot;Hello Interacx!&quot;;</pre>
 <p><img border="0" src="helloIX.png" width="114" height="26"></p>
 <p>That's it.</p>
-<h2>Reactive Behavior</h2>
+<h2><a name="ReactiveBehavior12">Reactive Behavior</a></h2>
 <p>The next example is displaying some realtime computed value as part of a SPAN 
 title.</p>
-<h3>The Vue Way</h3>
+<h3><a name="TheVueWay13">The Vue Way</a></h3>
 <pre>&lt;div id=&quot;app-2&quot;&gt;
   &lt;span v-bind:title=&quot;message&quot;&gt;
     Hover your mouse over me for a few seconds
@@ -263,7 +375,7 @@ var app2 = new Vue({
     message: 'You loaded this page on ' + new Date().toLocaleString()
   }
 })</pre>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay14">The IX Way</a></h3>
 <pre>&lt;span id=&quot;mySpan&quot;&gt;However your mouse over me for a few seconds to see the dynamically bound title!&lt;/span&gt;
 
 class HoverExample {
@@ -283,10 +395,10 @@ form
 using a multicast event handler.&nbsp; I did have an implementation where I 
 could just set the title as a function, but I didn't like the one-off 
 implementation behind the scenes that this required.</p>
-<h2>Conditionals</h2>
+<h2><a name="Conditionals15">Conditionals</a></h2>
 <p>I also really don't like to make a mess of the markup with declarative code 
 elements.</p>
-<h3>The Vue Way</h3>
+<h3><a name="TheVueWay16">The Vue Way</a></h3>
 <pre>&lt;div id=&quot;app-3&quot;&gt;
   &lt;span v-if=&quot;seen&quot;&gt;Now you see me&lt;/span&gt;
 &lt;/div&gt;
@@ -297,7 +409,7 @@ var app3 = new Vue({
     seen: true
   }
 })</pre>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay17">The IX Way</a></h3>
 <p>In IX, conditional behaviors are implemented through the event mechanism, 
 usually to manipulate element attributes.&nbsp; Diverging slightly from the Vue 
 example above, note the addition of two buttons to toggle the visibility of the <code>SPAN</code>:</p>
@@ -325,8 +437,8 @@ IX.CreateProxy(new VisibilityExample());</pre>
 	<li>Intellisense works perfectly in Visual Studio.</li>
 	<li>No &quot;string&quot; element name.</li>
 </ol>
-<h2>Loops</h2>
-<h3>The Vue Way</h3>
+<h2><a name="Loops18">Loops</a></h2>
+<h3><a name="TheVueWay19">The Vue Way</a></h3>
 <pre>&lt;div id=&quot;app-4&quot;&gt;
   &lt;ol&gt;
     &lt;li v-for=&quot;todo in todos&quot;&gt;
@@ -345,7 +457,7 @@ var app4 = new Vue({
     ]
   }
 })</pre>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay20">The IX Way</a></h3>
 <pre>&lt;ol id=&quot;someList&quot;&gt;&lt;/ol&gt;
 
 class ListExample {
@@ -371,8 +483,8 @@ listForm.someList.push(&quot;Wear a mask!&quot;);</pre>
 <pre>let listForm = IX.CreateProxy(new ListExample());
 let items = [&quot;Learn Javascript&quot;, &quot;Learn IX&quot;, &quot;Wear a mask!&quot;];
 listForm.someList = items;</pre>
-<h2>Button Clicks</h2>
-<h3>The Vue Way</h3>
+<h2><a name="ButtonClicks21">Button Clicks</a></h2>
+<h3><a name="TheVueWay22">The Vue Way</a></h3>
 <pre>&lt;div id=&quot;app-5&quot;&gt;
   &lt;p&gt;{{ message }}&lt;/p&gt;
   &lt;button v-on:click=&quot;reverseMessage&quot;&gt;Reverse Message&lt;/button&gt;
@@ -389,7 +501,7 @@ var app5 = new Vue({
     }
   }
 })</pre>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay23">The IX Way</a></h3>
 <pre>&lt;div&gt;
   &lt;p id=&quot;message&quot;&gt;&lt;/p&gt;
   &lt;button id=&quot;reverseMessage&quot;&gt;Reverse Message&lt;/button&gt;
@@ -412,7 +524,7 @@ IX.CreateProxy(new ReverseExample());</pre>
 <p><img border="0" src="r1.png" width="170" height="54"></p>
 <p>After clicking on the button:</p>
 <p><img border="0" src="r2.png" width="161" height="52"></p>
-<h2>Data Conversion</h2>
+<h2><a name="DataConversion24">Data Conversion</a></h2>
 <p>The following example is similar to Vue's <code>.number</code> attribute but the actual 
 implementation is much more general purpose.</p>
 <p>Consider this UI:</p>
@@ -455,13 +567,13 @@ data binding of the properties for setting <code>sum</code> to the values of </c
 We could easily have put <code>sum</code> in the <code>InputForm</code>, but instead I wanted to 
 illustrate how to use a separate container object, <code>OutputForm</code>, as a way of 
 compartmentalizing the properties into separate containers.</p>
-<h2>Two Way Binding</h2>
+<h2><a name="TwoWayBinding25">Two Way Binding</a></h2>
 <p>We've already seen in the examples above binding between the view and the 
 model.&nbsp; One of Vue's examples is direct update of one element based on the 
 realtime update of an input element.&nbsp; While I can't think of a real-life 
 example where one would need this, real-time updating, say of a filter criteria, 
 is definitely useful, so we'll start with the Vue example:</p>
-<h3>The Vue Way</h3>
+<h3><a name="TheVueWay26">The Vue Way</a></h3>
 <pre>&lt;div id=&quot;app-6&quot;&gt;
   &lt;p&gt;{{ message }}&lt;/p&gt;
     &lt;input v-model=&quot;message&quot;&gt;
@@ -473,7 +585,7 @@ var app6 = new Vue({
     message: 'Hello Vue!'
   }
 })</pre>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay27">The IX Way</a></h3>
 <p>This is already easily accomplished with events:</p>
 <pre>First Name:
 &lt;p id=&quot;message2&quot;&gt;/p&gt;
@@ -564,13 +676,13 @@ this contrived example:</p>
 }</pre>
 <p>and thus we get:</p>
 <p><img border="0" src="op1.png" width="313" height="49"></p>
-<h2>Checkboxes</h2>
-<h3>Binding Checkbox State</h3>
-<h4>The Vue Way</h4>
+<h2><a name="Checkboxes28">Checkboxes</a></h2>
+<h3><a name="BindingCheckboxState29">Binding Checkbox State</a></h3>
+<h4><a name="TheVueWay30">The Vue Way</a></h4>
 <p>Vue has an elegant demonstration of binding the checkbox state to the label:</p>
 <pre>&lt;input type=&quot;checkbox&quot; id=&quot;checkbox&quot; v-model=&quot;checked&quot;&gt;
 &lt;label for=&quot;checkbox&quot;&gt;{{ checked }}&lt;/label&gt;</pre>
-<h4>The IX Way</h4>
+<h4><a name="TheIXWay31">The IX Way</a></h4>
 <p>Given:</p>
 <pre>&lt;input id=&quot;checkbox&quot; type=&quot;checkbox&quot; /&gt;
 &lt;label id=&quot;ckLabel&quot; for=&quot;checkbox&quot;&gt;&lt;/label&gt;</pre>
@@ -606,8 +718,8 @@ IX.CreateProxy(new CheckboxExample());</pre>
 IX.CreateProxy(new CheckboxExample());</pre>
 <p><img border="0" src="ckunchecked.png" width="94" height="27"></p>
 <p><img border="0" src="ckchecked.png" width="87" height="29"></p>
-<h3>Binding Checkbox Values</h3>
-<h4>The View Way</h4>
+<h3><a name="BindingCheckboxValues32">Binding Checkbox Values</a></h3>
+<h4><a name="TheViewWay33">The View Way</a></h4>
 <pre>&lt;input type=&quot;checkbox&quot; id=&quot;jack&quot; value=&quot;Jack&quot; v-model=&quot;checkedNames&quot;&gt;
 &lt;label for=&quot;jack&quot;&gt;Jack&lt;/label&gt;
 &lt;input type=&quot;checkbox&quot; id=&quot;john&quot; value=&quot;John&quot; v-model=&quot;checkedNames&quot;&gt;
@@ -618,7 +730,7 @@ IX.CreateProxy(new CheckboxExample());</pre>
 &lt;span&gt;Checked names: {{ checkedNames }}&lt;/span&gt;</pre>
 <p>Note that the span text includes the array brackets:</p>
 <p><img border="0" src="viewckarray.png" width="251" height="69"></p>
-<h4>The IX Way</h4>
+<h4><a name="TheIXWay34">The IX Way</a></h4>
 <p>Given:</p>
 <pre>&lt;input id=&quot;jane&quot; value=&quot;Jane&quot; type=&quot;checkbox&quot; /&gt;
 &lt;label for=&quot;jane&quot;&gt;Jane&lt;/label&gt;
@@ -666,8 +778,8 @@ artifact of how IX is coded, and actually points out an interesting problem --
 the object property maps to only one attribute of the DOM element, and IX is 
 very opinionated as to what that DOM element should be, depending on what the 
 element is!</p>
-<h2>Radio Buttons</h2>
-<h3>The View Way</h3>
+<h2><a name="RadioButtons35">Radio Buttons</a></h2>
+<h3><a name="TheViewWay36">The View Way</a></h3>
 <p>This example binds the value of the radio button to the span:</p>
 <pre>&lt;input type=&quot;radio&quot; id=&quot;one&quot; value=&quot;One&quot; v-model=&quot;picked&quot;&gt;
 &lt;label for=&quot;one&quot;&gt;One&lt;/label&gt;
@@ -676,7 +788,7 @@ element is!</p>
 &lt;label for=&quot;two&quot;&gt;Two&lt;/label&gt;
 &lt;br&gt;
 &lt;span&gt;Picked: {{ picked }}&lt;/span&gt;</pre>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay37">The IX Way</a></h3>
 <p>Given:</p>
 <pre>&lt;input id=&quot;marc&quot; value=&quot;Marc&quot; type=&quot;radio&quot; name=&quot;group1&quot; /&gt;
 &lt;label for=&quot;marc&quot;&gt;Marc&lt;/label&gt;
@@ -708,8 +820,8 @@ properties:</p>
 <pre>let rbExample = IX.CreateProxy(new RadioExample());
 rbExample.chris = true;</pre>
 <p><img border="0" src="rb2.png" width="120" height="43"></p>
-<h2>ComboBoxes</h2>
-<h3>The Vue Way</h3>
+<h2><a name="ComboBoxes38">ComboBoxes</a></h2>
+<h3><a name="TheVueWay39">The Vue Way</a></h3>
 <pre>&lt;select v-model=&quot;selected&quot;&gt;
   &lt;option disabled value=&quot;&quot;&gt;Please select one&lt;/option&gt;
   &lt;option&gt;A&lt;/option&gt;
@@ -717,7 +829,7 @@ rbExample.chris = true;</pre>
   &lt;option&gt;C&lt;/option&gt;
 &lt;/select&gt;
 &lt;span&gt;Selected: {{ selected }}&lt;/span&gt;</pre>
-<h3>The IX Way</h3>
+<h3><a name="TheIXWay40">The IX Way</a></h3>
 <p>Given:</p>
 <pre>&lt;select id=&quot;selector&quot;&gt;
   &lt;option selected disabled&gt;Please select one&lt;/option&gt;
@@ -778,33 +890,33 @@ properties, <code>text</code> and <code>value</code>, for the selected item.</p>
 <p>Or change an option's text and value:</p>
 <pre>cb.selector2.options[2] = { text: &quot;bbb&quot;, value: 999 };</pre>
 <p><img border="0" src="selector8.png" width="124" height="154"></p>
-<h2>Implementation Patterns</h2>
+<h2><a name="ImplementationPatterns41">Implementation Patterns</a></h2>
 <p>IX requires that class properties match the DOM element ID and that event 
 handlers have specific signatures.</p>
-<h3>ID and Class Property Name</h3>
+<h3><a name="IDandClassPropertyName42">ID and Class Property Name</a></h3>
 <p><img border="0" src="idprop1.png" width="405" height="115"></p>
-<h3>KeyUp, Changed, and Convert Events</h3>
+<h3><a name="KeyUp,Changed,andConvertEvents43">KeyUp, Changed, and Convert Events</a></h3>
 <p><img border="0" src="idprop2.png" width="368" height="152"></p>
 <p>Notice:</p>
 <p>The event name uses the property name with the first letter capitalized, 
 	so <code>firstName</code> becomes <code>FirstName</code>.</p>
-<h3>Supported Events</h3>
-<h4>KeyUp</h4>
+<h3><a name="SupportedEvents44">Supported Events</a></h3>
+<h4><a name="KeyUp45">KeyUp</a></h4>
 <p>on[Prop]KeyUp - realtime key up events.</p>
-<h4>Changed</h4>
+<h4><a name="Changed46">Changed</a></h4>
 <p>on[Prop]Changed - element loses focus.</p>
 <p>This event applies to text, radio and checkbox inputs and &quot;select&quot; (combobox) 
 elements.</p>
-<h4>Convert</h4>
+<h4><a name="Convert47">Convert</a></h4>
 <p>onConvert[Prop] - if defined, executes the function before the KeyUp and 
 Changed events fire.</p>
-<h4>Hover</h4>
+<h4><a name="Hover48">Hover</a></h4>
 <p>on[Prop]Hover - if defined and the property has the signature:</p>
 <pre>{
   attr: { title: &quot;&quot; }
 };</pre>
 <p>This will set the element's title on mouse hover.</p>
-<h2>Integration Tests</h2>
+<h2><a name="IntegrationTests49">Integration Tests</a></h2>
 <p><img border="0" src="tests.png" width="257" height="302"></p>
 <p>We can easily test the behavior of IX by directly inspecting DOM elements 
 after model changes, and vice versa.&nbsp; And I prefer to use the phrase 
@@ -819,7 +931,7 @@ elements with object properties.&nbsp; </p>
 &lt;div id=&quot;testDom&quot;&gt;&lt;/div&gt;</pre>
 <p>We have an ordered list for the test results, and a <code>div</code> in which we place the 
 HTML required for each test.</p>
-<h3>The Test Runner</h3>
+<h3><a name="TheTestRunner50">The Test Runner</a></h3>
 <p>The tests actually use IX to manipulate the test results, and direct DOM 
 manipulation to simulate UI changes.&nbsp; The runner looks like this:</p>
 <pre>let testForm = IX.CreateProxy(new TestResults());
@@ -892,7 +1004,7 @@ error message.</p>
 }</pre>
 <p>And we see:</p>
 <p><img border="0" src="failed.png" width="173" height="25"></p>
-<h3>Defining the Tests</h3>
+<h3><a name="DefiningtheTests51">Defining the Tests</a></h3>
 <p>The tests are defined as an array of objects the specify:</p>
 <ol>
 	<li>The test to be run.</li>
@@ -949,7 +1061,7 @@ appropriate event, for example:</p>
   el.dispatchEvent(new Event('click')); 
   IXAssert.Equal(test.clicked, true);
 }</pre>
-<h3>The IXAssert Helper</h3>
+<h3><a name="TheIXAssertHelper52">The IXAssert Helper</a></h3>
 <p>This class simply wraps the <code>if</code> statement into a one-liner, as I rather 
 dislike <code>if</code> statements for assertions.</p>
 <pre>export class IXAssert {
@@ -967,15 +1079,15 @@ dislike <code>if</code> statements for assertions.</p>
     }
   }
 }</pre>
-<h3>You Don't Need TypeScript Classes</h3>
+<h3><a name="YouDon'tNeedTypeScriptClasses53">You Don't Need TypeScript Classes</a></h3>
 <p>You should realize from looking at how the tests are implemented that you 
 don't need actual TypeScript classes, you just need an object, like <code>obj: { inputTest: "Test" }</code> - after all, 
 a TypeScript class is a purely development-side construct used for type checking 
 and Intellisense by the IDE.&nbsp; Even a JavaScript class is really just 
 &quot;syntactical sugar of JavaScript's existing prototype-based inheritance.&quot; (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">JavaScript 
 classes</a>)</p>
-<h2>Behind the Scenes</h2>
-<h3>TypeScript Does Not Mean Runtime Type Reflection</h3>
+<h2><a name="BehindtheScenes54">Behind the Scenes</a></h2>
+<h3><a name="TypeScriptDoesNotMeanRuntimeTypeReflection55">TypeScript Does Not Mean Runtime Type Reflection</a></h3>
 <p>TypeScript is fantastic for ensuring type safety when <i>writing</i> code.&nbsp; 
 However, by the time the code has been transpiled to JavasScript, all that type 
 information that the IDE is using is of course lost.&nbsp; This is unfortunate 
@@ -1008,7 +1120,7 @@ they can even be initialized to null or undefined:</p>
 <p>Hence the constraint in IX that you must initialize properties, otherwise the 
 wire-up cannot be made between the class property and the element with the ID of 
 the property name.</p>
-<h3>Proxy Initialization</h3>
+<h3><a name="ProxyInitialization56">Proxy Initialization</a></h3>
 <pre>public static CreateProxy&lt;T&gt;(container: T): T {
   let proxy = new Proxy(container, IX.uiHandler);
   IX.CreatePropertyHandlers(container, proxy);
@@ -1026,7 +1138,7 @@ required:</p>
 	<li>Binders.</li>
 	<li>Final initialization.</li>
 </ol>
-<h4>CreatePropertyHandlers</h4>
+<h4><a name="CreatePropertyHandlers57">CreatePropertyHandlers</a></h4>
 <p>This code is intended to handle attributes, class lists, and event wireups:</p>
 <pre>private static CreatePropertyHandlers&lt;T&gt;(container: T, proxy: T) {
   Object.keys(container).forEach(k =&gt; {
@@ -1081,7 +1193,7 @@ required:</p>
 }</pre>
 <p>It should be obvious that this a very incomplete implementation sufficient 
 for the proof-of-concept.</p>
-<h4>WireUpEventHandler</h4>
+<h4><a name="WireUpEventHandler58">WireUpEventHandler</a></h4>
 <pre>private static WireUpEventHandler&lt;T&gt;(el: HTMLElement, container: T, proxy: T, propertyName: string, eventName: string, handlerName: string) {
   el.addEventListener(eventName, ev =&gt; {
     let el = ev.srcElement as HTMLElement;
@@ -1122,7 +1234,7 @@ for the proof-of-concept.</p>
   });
 }</pre>
 <p>Again, enough to implement the proof-of-concept.&nbsp; </p>
-<h4>CustomConverter</h4>
+<h4><a name="CustomConverter59">CustomConverter</a></h4>
 <pre>private static CustomConverter&lt;T&gt;(container: T, ucPropName: string, newVal: string): any {
   let converter = `onConvert${ucPropName}`;
 
@@ -1132,7 +1244,7 @@ for the proof-of-concept.</p>
 
   return newVal;
 }</pre>
-<h3>CreateButtonHandlers</h3>
+<h3><a name="CreateButtonHandlers60">CreateButtonHandlers</a></h3>
 <p>Buttons (and button-like things, like checkboxes and radio buttons) have 
 their own unique requirements:</p>
 <pre>private static CreateButtonHandlers&lt;T&gt;(container: T, proxy: T) {
@@ -1172,7 +1284,7 @@ their own unique requirements:</p>
     }
   });
 }</pre>
-<h3>CreateBinders</h3>
+<h3><a name="CreateBinders61">CreateBinders</a></h3>
 <p>Binders handle real-time events such as keyup as well as when an input 
 element loses focus.&nbsp; Adding to the complexity is the concept that a binder 
 might be associated with multiple checkboxes or radio buttons and bind the 
@@ -1248,7 +1360,7 @@ private static CreateBinders&lt;T&gt;(container: T, proxy: T): void {
     }
   });
 }</pre>
-<h3>Initialize</h3>
+<h3><a name="Initialize62">Initialize</a></h3>
 <p>This last function started off simple and ended up being more complicated as 
 it needs to handle not just native non-array types, but also arrays and DOM 
 elements like &quot;select&quot;:</p>
@@ -1301,7 +1413,7 @@ elements like &quot;select&quot;:</p>
     }
   });
 }</pre>
-<h3>Arrays</h3>
+<h3><a name="Arrays63">Arrays</a></h3>
 <p>Arrays are something of nightmare.&nbsp; Array functions, such as <code>push</code>, <code>pop</code>, 
 and <code>length</code>, are actually vectored through the proxy's getter (as would any other 
 function on a proxy'd object):</p>
@@ -1412,7 +1524,7 @@ if (!isNaN(prop)) {
     break;
   }
 }</pre>
-<h3>IXEvent</h3>
+<h3><a name="IXEvent64">IXEvent</a></h3>
 <p><code>IXEvent</code> (and it's helper, <code>IXSubscriber</code>) are wrappers to implement multicast 
 events:</p>
 <pre>export class IXSubscriber {
@@ -1443,7 +1555,7 @@ export class IXEvent {
     this.subscribers.forEach(s =&gt; s.Invoke(newVal, obj, oldVal));
   }
 }</pre>
-<h3>IXTemplate</h3>
+<h3><a name="IXTemplate65">IXTemplate</a></h3>
 <p>This class is my lame attempt to provide for templates.</p>
 <pre>export class IXTemplate {
   public _isTemplate: boolean = true;
@@ -1466,10 +1578,10 @@ export class IXEvent {
 <p>This is dubious at best because it sets <code>innerText</code> rather than <code>innerHtml</code>, and I'm 
 really not sure of the usefulness of it except that it's used in the integration 
 tests.</p>
-<h2>Conclusion</h2>
+<h2><a name="Conclusion66">Conclusion</a></h2>
 <p>Having come to the top of the other end of the U, I'm now reconsidering the 
 entire implementation.</p>
-<h3>Do I need a Proxy?</h3>
+<h3><a name="DoIneedaProxy67">Do I need a Proxy?</a></h3>
 <p>By the time I was implementing an example of the comobox, and using this 
 construct:</p>
 <pre>selector = new IXSelector();</pre>
@@ -1498,7 +1610,7 @@ HTML.... interfaces that already exist, for example,
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement">
 HTMLButtonElement</a>.&nbsp; That would work, but I also really like the beauty of:</p>
 <pre>nc.name = &quot;Hello World!&quot;;</pre>
-<h3>Both Proxy and DOM Wrapper</h3>
+<h3><a name="BothProxyandDOMWrapper68">Both Proxy and DOM Wrapper</a></h3>
 <p>There's no reason the implementation cannot support both by inspecting the 
 constructor name, as I'm already doing in the initialization process.&nbsp; This 
 would therefore leave it up to the developer:</p>
@@ -1512,22 +1624,10 @@ learn, as the wrapper would implement the HTML... interfaces that already exist
 and with which one would already be familiar.</p>
 <p>Also, all that krufty code to handle array push, pop, and assignment would be 
 a lot cleaner!</p>
-<h3>The Future Is Emerging</h3>
+<h3><a name="TheFutureIsEmerging69">The Future Is Emerging</a></h3>
 <p>Therefore I can only conclude that after having gone through the U process, I 
 now know what the future will look like, at least for the framework that <i>I</i> 
 want to use!</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>------------------------------------</p>
-<p>&nbsp;</p>
-
-<h2>SVG Example</h2>
-<p>Vue has a fun SVG example that I thought would be a decent proof of concept 
-of doing something a bit more challenging than working with basic DOM elements.</p>
-<p><a href="https://vuejs.org/v2/examples/svg.html">
-https://vuejs.org/v2/examples/svg.html</a></p>
 
 </body>
 
