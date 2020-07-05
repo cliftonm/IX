@@ -12,6 +12,7 @@
 Data Binding, Events, and More</p>
 <p>An Alice in Wonderland journey into the nuances of using Proxy with HTML and 
 TypeScript classes.</p>
+<p><img border="0" src="titlescreen.png" width="504" height="478"></p>
 
 <h2>Contents</h2><ul>
 <li><a href="#Introduction0">Introduction</a></li>
@@ -332,6 +333,11 @@ to appear&nbsp; flippant about &quot;disasters.&quot;)</p>
 solution.</p>
 <p>The source code can also be found at:
 <a href="https://github.com/cliftonm/IX">https://github.com/cliftonm/IX</a></p>
+<p>There are two HTML pages to play with:</p>
+<ol>
+	<li>index.html is the demo page</li>
+	<li>Tests/IntegrationTests.html runs the integration tests.</li>
+</ol>
 <h2><a name="SimpleDataBindingofInnerHTML9">Simple Data Binding of Inner HTML</a></h2>
 <p>Let's start with simple data binding of the inner HTML associated with a <code>DIV</code>.</p>
 <h3><a name="TheVueWay10">The Vue Way</a></h3>
@@ -1139,7 +1145,15 @@ required:</p>
 	<li>Final initialization.</li>
 </ol>
 <h4><a name="CreatePropertyHandlers57">CreatePropertyHandlers</a></h4>
-<p>This code is intended to handle attributes, class lists, and event wireups:</p>
+<p>This code is intended to handle attributes, class lists, and event wireups.&nbsp; 
+Events are only wired up once, in case the proxy is re-initialized after class 
+property assignments.&nbsp; To make matters a bit more complicated, specific 
+cases are handled here, such as proxy'ing the <code>attr</code> key to 
+accommodate the custom syntax for assigning attributes to the associated DOM 
+element.&nbsp; The <code>class</code> attribute is handled similarly, creating a 
+proxy for the <code>classList</code> key.&nbsp; A better implementation is 
+discussed in the conclusion.&nbsp; Otherwise, the initial purpose of the 
+function was solely to handle the <code>mouseover</code>, <code>change</code>, and <code>keyup</code> events.</p>
 <pre>private static CreatePropertyHandlers&lt;T&gt;(container: T, proxy: T) {
   Object.keys(container).forEach(k =&gt; {
   let el = document.getElementById(k);
@@ -1194,6 +1208,17 @@ required:</p>
 <p>It should be obvious that this a very incomplete implementation sufficient 
 for the proof-of-concept.</p>
 <h4><a name="WireUpEventHandler58">WireUpEventHandler</a></h4>
+<p>The event handler that is attached the event listener implements a custom 
+check for the <code>SELECT</code> HTML element and makes the assumption that the class 
+property has been initialized with an <code>IXSelector</code> instance.&nbsp; 
+This was done so that the selected item's text and value could be assigned on 
+selection to the <code>IXSelector</code> instance.&nbsp; Otherwise, the event 
+handler updates the class' property (as in, the class that has been proxied.)&nbsp; 
+Because &quot;buttons&quot; don't have a property but are just an event, we check if there 
+is actually a property on the DOM that needs to be read and set on the 
+corresponding class property.&nbsp; Lastly, if the class implements an event 
+handler, any multicast events are fired.&nbsp; A custom converter, if defined in 
+the class, is invoked first for non-button events.</p>
 <pre>private static WireUpEventHandler&lt;T&gt;(el: HTMLElement, container: T, proxy: T, propertyName: string, eventName: string, handlerName: string) {
   el.addEventListener(eventName, ev =&gt; {
     let el = ev.srcElement as HTMLElement;
@@ -1210,22 +1235,22 @@ for the proof-of-concept.</p>
         selector.text = elSelector.options[elSelector.selectedIndex].text;
         break;
 
-    default:
-      // buttons are click events, not change properties.
-      if (propertyName) {
-        oldVal = container[el.id];
-        newVal = el[propertyName];
-        propName = el.id;
-      }
+      default:
+        // buttons are click events, not change properties.
+        if (propertyName) {
+          oldVal = container[el.id];
+          newVal = el[propertyName];
+          propName = el.id;
+        }
 
-      let ucPropName = IX.UpperCaseFirstChar(propName ?? &quot;&quot;);
+        let ucPropName = IX.UpperCaseFirstChar(propName ?? &quot;&quot;);
 
-      if (propertyName) {
-        newVal = IX.CustomConverter(proxy, ucPropName, newVal);
-        container[propName] = newVal;
-      }
+        if (propertyName) {
+          newVal = IX.CustomConverter(proxy, ucPropName, newVal);
+          container[propName] = newVal;
+        }
 
-      break;
+        break;
     }
 
     if (handler) {
@@ -1246,7 +1271,11 @@ for the proof-of-concept.</p>
 }</pre>
 <h3><a name="CreateButtonHandlers60">CreateButtonHandlers</a></h3>
 <p>Buttons (and button-like things, like checkboxes and radio buttons) have 
-their own unique requirements:</p>
+their own unique requirements.&nbsp; Checkboxes and radio buttons (which are 
+<code>INPUT</code> HTML elements) have a <code>checked</code> 
+property, whereas buttons do not.&nbsp; The proxy'd class must implement the 
+expected &quot;on....&quot; which must be assigned to an <code>IXEvent</code> to support multicast 
+events.</p>
 <pre>private static CreateButtonHandlers&lt;T&gt;(container: T, proxy: T) {
   Object.keys(container).forEach(k =&gt; {
     if (k.startsWith(&quot;on&quot;) &amp;&amp; k.endsWith(&quot;Clicked&quot;)) {
@@ -1288,7 +1317,16 @@ their own unique requirements:</p>
 <p>Binders handle real-time events such as keyup as well as when an input 
 element loses focus.&nbsp; Adding to the complexity is the concept that a binder 
 might be associated with multiple checkboxes or radio buttons and bind the 
-list of currently selected items.</p>
+list of currently selected items.&nbsp; This is a confusing piece of code, as 
+both array and non-array properties can be bound.&nbsp; It is assumed that if an 
+array is being bound, the array is populated with the selected checkboxes or 
+radio buttons (though technically, a radio button should be exclusive.)&nbsp; 
+Otherwise, the property itself is set with either the checked state or the 
+element's value.&nbsp; Lastly, an optional &quot;op&quot; (operation) can be defined 
+before the value is set <i>on the proxy</i>.&nbsp; Setting the value on the 
+proxy rather than the <i>proxy'd</i> object invokes the proxy setter which can 
+define further behaviors but ultimately also assigns the value to the original 
+container object.</p>
 <pre>// We assume binders are created on input elements. Probably not a great assumption.
 private static CreateBinders&lt;T&gt;(container: T, proxy: T): void {
   Object.keys(container).forEach(k =&gt; {
@@ -1342,18 +1380,18 @@ private static CreateBinders&lt;T&gt;(container: T, proxy: T): void {
             } else {
               // Realtime typing
               el.addEventListener(&quot;keyup&quot;, ev =&gt; {
-              let v = (ev.currentTarget as HTMLInputElement).value;
-              // proxy[elName] = v; --- why?
-              v = b.op === undefined ? v : b.op(v);
-              proxy[k] = v;
-            });
+                let v = (ev.currentTarget as HTMLInputElement).value;
+                // proxy[elName] = v; --- why?
+                v = b.op === undefined ? v : b.op(v);
+                proxy[k] = v;
+              });
 
-            // Lost focus, or called when value is set programmatically in the proxy setter.
-            el.addEventListener(&quot;changed&quot;, ev =&gt; {
-              let v = (ev.currentTarget as HTMLInputElement).value;
-              v = b.op === undefined ? v : b.op(v);
-              proxy[k] = v;
-            });
+              // Lost focus, or called when value is set programmatically in the proxy setter.
+              el.addEventListener(&quot;changed&quot;, ev =&gt; {
+                let v = (ev.currentTarget as HTMLInputElement).value;
+                v = b.op === undefined ? v : b.op(v);
+                proxy[k] = v;
+              });
           }
         });
       }
